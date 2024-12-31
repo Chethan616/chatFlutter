@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/main_screen/chats_list_screen.dart';
 import 'package:flutter_chat_pro/main_screen/groups_screen.dart';
 import 'package:flutter_chat_pro/main_screen/people_screen.dart';
+import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/utilities/assets_manager.dart';
+import 'package:flutter_chat_pro/utilities/global_methods.dart';
+import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -23,17 +26,21 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthenticationProvider>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('app_name'),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircleAvatar(
+            padding: const EdgeInsets.all(8.0),
+            child: userImageWidget(
+              imageUrl: authProvider.userModel!.image,
               radius: 20,
-              backgroundImage: AssetImage(AssetsManager.userImage),
+              onTap: () {
+                // navigae to user profile
+              },
             ),
-          ),
+          )
         ],
       ),
       body: PageView(
