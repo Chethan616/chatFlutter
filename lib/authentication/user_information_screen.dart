@@ -1,10 +1,14 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_pro/constants.dart';
+import 'package:flutter_chat_pro/models/user_model.dart';
+import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/utilities/assets_manager.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
 import 'package:flutter_chat_pro/widgets/app_bar_back_button.dart';
 import 'package:flutter_chat_pro/widgets/display_user_image.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:provider/provider.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class UserInformationScreen extends StatefulWidget {
@@ -38,10 +42,16 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
     );
 
     // Crop image
-    cropImage(finalFileImage?.path);
+    await cropImage(finalFileImage?.path);
+
+    popContext();
   }
 
-  void cropImage(filePath) async {
+  popContext() {
+    Navigator.pop(context);
+  }
+
+  Future<void> cropImage(filePath) async {
     if (filePath != null) {
       CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: filePath,
@@ -54,8 +64,6 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
         setState(() {
           finalFileImage = File(croppedFile.path);
         });
-      } else {
-        //popTheDialog();
       }
     }
   }
@@ -70,7 +78,6 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
             ListTile(
               onTap: () {
                 selectImage(true);
-                Navigator.of(context).pop();
               },
               leading: const Icon(Icons.camera_alt_outlined),
               title: const Text('Camera'),
@@ -78,7 +85,6 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
             ListTile(
               onTap: () {
                 selectImage(false);
-                Navigator.of(context).pop();
               },
               leading: const Icon(Icons.image_outlined),
               title: const Text('Gallery'),
@@ -135,7 +141,14 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
                 child: RoundedLoadingButton(
                   controller: _btnController,
                   onPressed: () {
+                    if (_nameController.text.isEmpty ||
+                        _nameController.text.length < 3) {
+                      showSnackBar(context, 'Please enter your name');
+                      _btnController.reset();
+                      return;
+                    }
                     // Save user information
+                    saveUserDataToFireStore();
                   },
                   successIcon: Icons.check,
                   successColor: Colors.green,
@@ -155,6 +168,53 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  // save user data to firestore
+  void saveUserDataToFireStore() async {
+    final authProvider = context.read<AuthenticationProvider>();
+
+    UserModel userModel = UserModel(
+      uid: authProvider.uid!,
+      name: _nameController.text.trim(),
+      phoneNumber: authProvider.phoneNumber!,
+      image: '',
+      token: '',
+      aboutMe: 'Hey there! I am using Chat App',
+      lastSeen: '',
+      createdAt: '',
+      isOnline: true,
+      friendsUIDs: [],
+      friendRequestsUIDs: [],
+      sentFriendRequestsUIDs: [],
+    );
+
+    authProvider.saveUserDataToFireStore(
+      userModel: userModel,
+      fileImage: finalFileImage,
+      onSuccess: () async {
+        _btnController.success();
+        // Save user data to shared preferences
+        await authProvider.saveUserDataToSharedPreferences();
+
+        navigateToHomeScreen();
+
+        Navigator.of(context).pushReplacementNamed(Constants.homeScreen);
+      },
+      onFail: () async {
+        _btnController.error();
+        await Future.delayed(const Duration(seconds: 1));
+        showSnackBar(context, 'Failed to save user data');
+        _btnController.reset();
+      },
+    );
+  }
+
+  void navigateToHomeScreen() {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      Constants.homeScreen,
+      (route) => false,
     );
   }
 }

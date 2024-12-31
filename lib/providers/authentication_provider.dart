@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,8 +20,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
   bool get isLoading => _isLoading;
   bool get isSuccessful => _isSuccessful;
-  String? get getUid => _uid;
-  String? get getPhoneNumber => _phoneNumber;
+  String? get uid => _uid;
+  String? get phoneNumber => _phoneNumber;
   UserModel? get userModel => _userModel;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -133,5 +134,59 @@ class AuthenticationProvider extends ChangeNotifier {
       notifyListeners();
       showSnackBar(context, e.toString());
     });
+  }
+
+  // save user data to firestore
+  Future<void> saveUserDataToFireStore({
+    required UserModel userModel,
+    required File? fileImage,
+    required Function onSuccess,
+    required Function onFail,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      if (fileImage != null) {
+        // upload image to firebase storage
+
+        String imageUrl = await storeFileToStorage(
+            file: fileImage,
+            reference: '${Constants.userImages}/${userModel.uid}');
+
+        userModel.image = imageUrl;
+      }
+
+      userModel.lastSeen = DateTime.now().microsecondsSinceEpoch.toString();
+      userModel.createdAt = DateTime.now().microsecondsSinceEpoch.toString();
+
+      _userModel = userModel;
+      _uid = userModel.uid;
+
+      // save user data to firestore
+      await _firestore
+          .collection(Constants.users)
+          .doc(userModel.uid)
+          .set(userModel.toMap());
+
+      _isLoading = false;
+      onSuccess();
+      notifyListeners();
+    } on FirebaseException catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      onFail(e.toString());
+    }
+  }
+
+  // store file to storage and return file url
+  Future<String> storeFileToStorage({
+    required File file,
+    required String reference,
+  }) async {
+    UploadTask uploadTask = _storage.ref().child(reference).putFile(file);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String fileUrl = await taskSnapshot.ref.getDownloadURL();
+    return fileUrl;
   }
 }
