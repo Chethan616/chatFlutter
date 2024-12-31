@@ -2,7 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/constants.dart';
+import 'package:flutter_chat_pro/utilities/assets_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pinput/pinput.dart';
 import 'package:provider/provider.dart';
 
@@ -127,7 +129,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
                 const SizedBox(height: 30),
                 authProvider.isLoading
-                    ? const CircularProgressIndicator()
+                    ? Lottie.asset(AssetsManager.loading)
                     : SizedBox.shrink(),
                 authProvider.isSuccessful
                     ? Container(

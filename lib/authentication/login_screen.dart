@@ -116,9 +116,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 suffixIcon: _phoneNumberController.text.length > 9
                     ? authProvider.isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
+                        ? Padding(
+                            padding: const EdgeInsets.all(
+                                8.0), // Adds 8px padding on all sides
+                            child: Lottie.asset(
+                              AssetsManager
+                                  .loading, // Your Lottie animation asset
+                              height: 100, // Optional: Specify height
+                              width: 100, // Optional: Specify width
+                              fit: BoxFit
+                                  .contain, // Ensures the animation fits within the bounds
+                            ),
                           )
                         : InkWell(
                             onTap: () {

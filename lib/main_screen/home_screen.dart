@@ -1,6 +1,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/main_screen/chats_list_screen.dart';
 import 'package:flutter_chat_pro/main_screen/groups_screen.dart';
 import 'package:flutter_chat_pro/main_screen/people_screen.dart';
@@ -37,7 +38,12 @@ class _HomeScreenState extends State<HomeScreen> {
               imageUrl: authProvider.userModel!.image,
               radius: 20,
               onTap: () {
-                // navigae to user profile
+                // navigae to user profile with uid as argument
+                Navigator.pushNamed(
+                  context,
+                  Constants.profileScreen,
+                  arguments: authProvider.userModel!.uid,
+                );
               },
             ),
           )
@@ -55,11 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.chat_bubble_2_fill),
+            icon: Icon(CupertinoIcons.chat_bubble_2),
             label: 'Chats',
           ),
           BottomNavigationBarItem(
-            icon: Icon(CupertinoIcons.group_solid),
+            icon: Icon(CupertinoIcons.group),
             label: 'Groups',
           ),
           BottomNavigationBarItem(

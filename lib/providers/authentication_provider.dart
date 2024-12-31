@@ -28,6 +28,28 @@ class AuthenticationProvider extends ChangeNotifier {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
+  // check authentication state
+  Future<bool> checkAuthenticationState() async {
+    bool isSignedIn = false;
+    await Future.delayed(const Duration(seconds: 2));
+    if (_auth.currentUser != null) {
+      _uid = _auth.currentUser!.uid;
+
+      // get user data from firestore
+      await getUserDataFromFirestore();
+
+      // save user data to shared preferences
+      await saveUserDataToSharedPreferences();
+
+      notifyListeners();
+
+      isSignedIn = true;
+    } else {
+      isSignedIn = false;
+    }
+    return isSignedIn;
+  }
+
   // check if user exists
   Future<bool> checkUserExists() async {
     DocumentSnapshot documentSnapshot =
@@ -188,5 +210,10 @@ class AuthenticationProvider extends ChangeNotifier {
     TaskSnapshot taskSnapshot = await uploadTask;
     String fileUrl = await taskSnapshot.ref.getDownloadURL();
     return fileUrl;
+  }
+
+  // get user stream
+  Stream<DocumentSnapshot> userStream({required String userId}) {
+    return _firestore.collection(Constants.users).doc(_uid).snapshots();
   }
 }
