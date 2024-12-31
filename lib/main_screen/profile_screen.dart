@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/models/user_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/utilities/assets_manager.dart';
+import 'package:flutter_chat_pro/utilities/global_methods.dart';
 import 'package:flutter_chat_pro/widgets/app_bar_back_button.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
@@ -19,8 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     final currentUser = context.read<AuthenticationProvider>().userModel!;
 
-    //get user data from arguments
+    // Get user data from arguments
     final uid = ModalRoute.of(context)!.settings.arguments as String;
+
     return Scaffold(
       appBar: AppBar(
         leading: AppBarBackButton(
@@ -32,9 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
         actions: [
           currentUser.uid == uid
-              ?
-              // logout button
-              IconButton(
+              ? IconButton(
                   onPressed: () {
                     // context.read<AuthenticationProvider>().logout();
                   },
@@ -55,9 +56,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 Center(
                   child: Container(
-                      height: 400,
-                      width: 200,
-                      child: Lottie.asset(AssetsManager.loading)),
+                    height: 400,
+                    width: 200,
+                    child: Lottie.asset(AssetsManager.loading),
+                  ),
                 ),
                 const CircularProgressIndicator(),
               ],
@@ -67,15 +69,121 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final userModel =
               UserModel.fromMap(snapshot.data!.data()! as Map<String, dynamic>);
 
-          return ListTile(
-            leading: CircleAvatar(
-              radius: 30,
-              backgroundImage: NetworkImage(userModel.image),
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            child: Column(
+              children: [
+                Center(
+                  child: userImageWidget(
+                    imageUrl: userModel.image,
+                    radius: 60,
+                    onTap: () {
+                      // Navigate to user profile with uid as arguments
+                    },
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  userModel.name,
+                  style: GoogleFonts.openSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  userModel.phoneNumber, // Display phone number
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                buildFriendRequestsButton(
+                  currentUser: currentUser,
+                  userModel: userModel,
+                ),
+                const SizedBox(height: 10),
+                buildFriendsButton(
+                  currentUser: currentUser,
+                  userModel: userModel,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  userModel.aboutMe,
+                  style: GoogleFonts.openSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            title: Text(userModel.name),
-            subtitle: Text(userModel.aboutMe),
           );
         },
+      ),
+    );
+  }
+
+  // Friend Requests Button
+  Widget buildFriendRequestsButton({
+    required UserModel currentUser,
+    required UserModel userModel,
+  }) {
+    if (currentUser.uid == userModel.uid &&
+        userModel.friendRequestsUIDs.isNotEmpty) {
+      return buildElevatedButton(
+        onPressed: () {
+          // Navigate to friend requests screen
+        },
+        label: 'View Friend Requests',
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
+  }
+
+  // Friends Button
+  Widget buildFriendsButton({
+    required UserModel currentUser,
+    required UserModel userModel,
+  }) {
+    if (currentUser.uid == userModel.uid && userModel.friendsUIDs.isNotEmpty) {
+      return buildElevatedButton(
+        onPressed: () {
+          // Navigate to friends screen
+        },
+        label: 'View Friends',
+      );
+    } else {
+      if (currentUser.uid != userModel.uid) {
+        // Show send friend request button
+        return buildElevatedButton(
+          onPressed: () async {
+            // Send friend request
+          },
+          label: 'Send Friend Request',
+        );
+      } else {
+        return const SizedBox.shrink();
+      }
+    }
+  }
+
+  // Common button builder
+  Widget buildElevatedButton({
+    required VoidCallback onPressed,
+    required String label,
+  }) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.7,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        child: Text(
+          label.toUpperCase(),
+          style: GoogleFonts.openSans(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
