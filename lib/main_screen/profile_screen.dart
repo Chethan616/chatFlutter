@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/models/user_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/utilities/assets_manager.dart';
@@ -35,11 +36,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: const Text('Profile'),
         actions: [
           currentUser.uid == uid
-              ? IconButton(
-                  onPressed: () {
-                    // context.read<AuthenticationProvider>().logout();
+              ?
+              // log out button
+              IconButton(
+                  onPressed: () async {
+                    // navigate to settings screen
+                    Navigator.pushNamed(
+                      context,
+                      Constants.settingsScreen,
+                      arguments: uid,
+                    );
                   },
-                  icon: const Icon(Icons.logout),
+                  icon: const Icon(Icons.settings),
                 )
               : const SizedBox(),
         ],
@@ -107,6 +115,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 buildFriendsButton(
                   currentUser: currentUser,
                   userModel: userModel,
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Text('About Me',
+                        style: GoogleFonts.openSans(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        )),
+                    const SizedBox(width: 10),
+                    const SizedBox(
+                      height: 40,
+                      width: 40,
+                      child: Divider(
+                        color: Colors.grey,
+                        thickness: 1,
+                      ),
+                    )
+                  ],
                 ),
                 const SizedBox(height: 10),
                 Text(

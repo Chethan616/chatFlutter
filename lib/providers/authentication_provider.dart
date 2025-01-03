@@ -216,4 +216,18 @@ class AuthenticationProvider extends ChangeNotifier {
   Stream<DocumentSnapshot> userStream({required String userId}) {
     return _firestore.collection(Constants.users).doc(_uid).snapshots();
   }
+
+  Future logout() async {
+    // clear user token from firestore
+    await _firestore.collection(Constants.users).doc(_userModel!.uid).update({
+      Constants.token: '',
+    });
+    // sign out from firebase auth
+    await _auth.signOut();
+
+    //  clear shared preferences
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    await sharedPreferences.clear();
+    notifyListeners();
+  }
 }

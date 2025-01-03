@@ -20,6 +20,10 @@ class _OtpScreenState extends State<OtpScreen> {
   final focusNode = FocusNode();
   String? otpCode;
 
+  // New state to track loading completion
+  bool isLoadingComplete = false;
+  bool showGreenTick = false;
+
   @override
   void dispose() {
     conroller.dispose();
@@ -61,7 +65,7 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
             child: Column(
               children: [
-                const SizedBox(height: 50),
+                const SizedBox(height: 20),
                 Text(
                   'Verification',
                   style: GoogleFonts.openSans(
@@ -69,27 +73,27 @@ class _OtpScreenState extends State<OtpScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 50),
+                const SizedBox(height: 30),
                 Text(
-                  'Enter the 6 digit code sent the number',
+                  'Enter the 6 digit code sent to the number',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.openSans(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 5),
                 Text(
                   phoneNumber,
                   textAlign: TextAlign.center,
                   style: GoogleFonts.openSans(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
                 SizedBox(
-                  height: 68,
+                  height: 48,
                   child: Pinput(
                     length: 6,
                     controller: conroller,
@@ -127,33 +131,51 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 40),
                 authProvider.isLoading
-                    ? Lottie.asset(AssetsManager.loading)
-                    : SizedBox.shrink(),
-                authProvider.isSuccessful
-                    ? Container(
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.done,
-                          color: Colors.white,
-                          size: 30,
-                        ),
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.deepPurpleAccent),
+                            strokeWidth: 6,
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                       )
-                    : const SizedBox.shrink(),
+                    : SizedBox.shrink(),
+                // Fade and Scale effect for the green tick after loading completes
+                AnimatedOpacity(
+                  opacity: showGreenTick ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: AnimatedScale(
+                    scale: showGreenTick ? 1.0 : 0.5,
+                    duration: const Duration(milliseconds: 300),
+                    child: Container(
+                      height: 40,
+                      width: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.done,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
                 authProvider.isLoading
                     ? const SizedBox.shrink()
-                    : Text('didn\'t receive the code?',
-                        style: GoogleFonts.openSans(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        )),
-                const SizedBox(height: 10),
+                    : const SizedBox(height: 20),
+                Text('didn\'t receive the code?',
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    )),
+                const SizedBox(height: 5),
                 TextButton(
                     onPressed: () {
                       // TODO resend otp code
@@ -184,19 +206,17 @@ class _OtpScreenState extends State<OtpScreen> {
       otpCode: otpCode,
       context: context,
       onSuccess: () async {
+        setState(() {
+          showGreenTick = true; // Trigger the transition effect
+        });
+
         // 1. check if the user exists in firestore
         bool userExists = await authProvider.checkUserExists();
 
         if (userExists) {
           // 2. if user exists, navigate to the home screen
-
-          // * get user information from firestore
           await authProvider.getUserDataFromFirestore();
-
-          // * save user information to provider / shared preferences
           await authProvider.saveUserDataToSharedPreferences();
-
-          // * navigate to the home screen
           navigate(userExists: true);
         } else {
           // 3. if user does not exist, navigate to the user information screen
@@ -208,14 +228,12 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void navigate({required bool userExists}) {
     if (userExists) {
-      // navigate to the home screen
       Navigator.pushNamedAndRemoveUntil(
         context,
         Constants.homeScreen,
         (route) => false,
       );
     } else {
-      // navigate to the user information screen
       Navigator.pushNamed(
         context,
         Constants.userInformationScreen,
