@@ -217,6 +217,14 @@ class AuthenticationProvider extends ChangeNotifier {
     return _firestore.collection(Constants.users).doc(_uid).snapshots();
   }
 
+  // get all users stream
+  Stream<QuerySnapshot> getAllUsersStream({required String userID}) {
+    return _firestore
+        .collection(Constants.users)
+        .where(Constants.uid, isNotEqualTo: userID)
+        .snapshots();
+  }
+
   Future logout() async {
     // clear user token from firestore
     await _firestore.collection(Constants.users).doc(_userModel!.uid).update({
