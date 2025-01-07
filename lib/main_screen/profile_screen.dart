@@ -197,6 +197,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return buildElevatedButton(
           onPressed: () async {
             // Send friend request
+            await context
+                .read<AuthenticationProvider>()
+                .sendFriendRequest(
+                  friendId: userModel.uid,
+                )
+                .whenComplete(() {
+              showSnackBar(context, 'friend request sent');
+            });
           },
           label: 'Send Friend Request',
         );

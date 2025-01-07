@@ -214,7 +214,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   // get user stream
   Stream<DocumentSnapshot> userStream({required String userId}) {
-    return _firestore.collection(Constants.users).doc(_uid).snapshots();
+    return _firestore.collection(Constants.users).doc(userId).snapshots();
   }
 
   // get all users stream
@@ -223,6 +223,23 @@ class AuthenticationProvider extends ChangeNotifier {
         .collection(Constants.users)
         .where(Constants.uid, isNotEqualTo: userID)
         .snapshots();
+  }
+
+  // send friend request
+  Future<void> sendFriendRequest({
+    required String friendId,
+  }) async {
+    try {
+      await _firestore.collection(Constants.users).doc(friendId).update({
+        Constants.friendRequestsUIDs: FieldValue.arrayUnion([_uid])
+      });
+
+      await _firestore.collection(Constants.users).doc(_uid).update({
+        Constants.sentFriendRequestsUIDs: FieldValue.arrayUnion([friendId])
+      });
+    } on FirebaseException catch (e) {
+      print(e);
+    }
   }
 
   Future logout() async {
