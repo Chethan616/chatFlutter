@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 8.0), // Adds 8px padding on all sides
                             child: Lottie.asset(
                               AssetsManager
-                                  .loading, // Your Lottie animation asset
+                                  .loading1, // Your Lottie animation asset
                               height: 100, // Optional: Specify height
                               width: 100, // Optional: Specify width
                               fit: BoxFit

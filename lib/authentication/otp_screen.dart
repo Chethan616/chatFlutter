@@ -131,17 +131,20 @@ class _OtpScreenState extends State<OtpScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 30),
                 authProvider.isLoading
                     ? Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.deepPurpleAccent),
-                            strokeWidth: 6,
+                          Lottie.asset(
+                            AssetsManager
+                                .circularLoading, // Your Lottie animation asset
+                            height: 60, // Optional: Specify height
+                            width: 60, // Optional: Specify width
+                            fit: BoxFit
+                                .contain, // Ensures the animation fits within the bounds
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 10),
                         ],
                       )
                     : SizedBox.shrink(),

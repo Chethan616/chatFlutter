@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final authProvider = context.watch<AuthenticationProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('app_name'),
+        title: const Text('App_Name'),
         actions: [
           Padding(
             padding: const EdgeInsets.all(8.0),

@@ -42,9 +42,10 @@ class _LandingScreenState extends State<LandingScreen> {
           height: 300,
           width: 200,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center, // Center the content
             children: [
               Lottie.asset(AssetsManager.loading),
-              const LinearProgressIndicator(),
+              // const LinearProgressIndicator(),
             ],
           ),
         ),
