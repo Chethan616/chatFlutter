@@ -193,21 +193,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
     } else {
       if (currentUser.uid != userModel.uid) {
-        // Show send friend request button
-        return buildElevatedButton(
-          onPressed: () async {
-            // Send friend request
-            await context
-                .read<AuthenticationProvider>()
-                .sendFriendRequest(
-                  friendId: userModel.uid,
-                )
-                .whenComplete(() {
-              showSnackBar(context, 'friend request sent');
-            });
-          },
-          label: 'Send Friend Request',
-        );
+        // show cancel friend request button if the user sent us friend request
+        // else show send friend request button
+
+        if (userModel.friendRequestsUIDs.contains(currentUser.uid)) {
+          // Show send friend request button
+          return buildElevatedButton(
+            onPressed: () async {
+              await context
+                  .read<AuthenticationProvider>()
+                  .cancelFriendRequest(friendId: userModel.uid)
+                  .whenComplete(() {
+                showSnackBar(context, 'friend request cancelled');
+              });
+            },
+            label: 'Cancel Friend Request',
+          );
+        } else if (userModel.sentFriendRequestsUIDs.contains(currentUser.uid)) {
+          // Show send friend request button
+          return buildElevatedButton(
+            onPressed: () async {
+              await context
+                  .read<AuthenticationProvider>()
+                  .acceptFriendRequest(friendId: userModel.uid)
+                  .whenComplete(() {
+                showSnackBar(
+                    context, 'You are now Friends with ${userModel.name}');
+              });
+            },
+            label: 'Accept Friend Request',
+          );
+        } else {
+          // Show send friend request button
+          return buildElevatedButton(
+            onPressed: () async {
+              await context
+                  .read<AuthenticationProvider>()
+                  .sendFriendRequest(friendId: userModel.uid)
+                  .whenComplete(() {
+                showSnackBar(context, 'friend request sent');
+              });
+            },
+            label: 'Send Friend Request',
+          );
+        }
       } else {
         return const SizedBox.shrink();
       }
