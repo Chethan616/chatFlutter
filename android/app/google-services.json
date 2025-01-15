@@ -42,6 +42,44 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841803557856:android:2f4285162d0d4c2add5985",
+        "android_client_info": {
+          "package_name": "com.example.flutterchatapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaQofvQSQG5ibnFjDP5GAGL7FO9BafaLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841803557856:android:29f434ed2566d544dd5985",
+        "android_client_info": {
+          "package_name": "com.raphaeldaka.flutterchatpro"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaQofvQSQG5ibnFjDP5GAGL7FO9BafaLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

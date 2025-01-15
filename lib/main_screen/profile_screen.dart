@@ -171,8 +171,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return buildElevatedButton(
         onPressed: () {
           // Navigate to friend requests screen
+          Navigator.pushNamed(
+            context,
+            Constants.friendRequestsScreen,
+          );
         },
         label: 'View Friend Requests',
+        width: MediaQuery.of(context).size.width * 0.7,
+        backgroundColor: Theme.of(context).cardColor,
+        textColor: Theme.of(context).primaryColor,
       );
     } else {
       return const SizedBox.shrink();
@@ -186,11 +193,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     if (currentUser.uid == userModel.uid && userModel.friendsUIDs.isNotEmpty) {
       return buildElevatedButton(
-        onPressed: () {
-          // Navigate to friends screen
-        },
-        label: 'View Friends',
-      );
+          onPressed: () {
+            // Navigate to friends screen
+            Navigator.pushNamed(
+              context,
+              Constants.friendsScreen,
+            );
+          },
+          label: 'View Friends',
+          width: MediaQuery.of(context).size.width * 0.7,
+          backgroundColor: Theme.of(context).cardColor,
+          textColor: Theme.of(context).primaryColor);
     } else {
       if (currentUser.uid != userModel.uid) {
         // show cancel friend request button if the user sent us friend request
@@ -208,20 +221,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
             label: 'Cancel Friend Request',
+            width: MediaQuery.of(context).size.width * 0.7,
+            backgroundColor: Theme.of(context).cardColor,
+            textColor: Theme.of(context).primaryColor,
           );
         } else if (userModel.sentFriendRequestsUIDs.contains(currentUser.uid)) {
           // Show send friend request button
           return buildElevatedButton(
-            onPressed: () async {
-              await context
-                  .read<AuthenticationProvider>()
-                  .acceptFriendRequest(friendId: userModel.uid)
-                  .whenComplete(() {
-                showSnackBar(
-                    context, 'You are now Friends with ${userModel.name}');
-              });
-            },
-            label: 'Accept Friend Request',
+              onPressed: () async {
+                await context
+                    .read<AuthenticationProvider>()
+                    .acceptFriendRequest(friendId: userModel.uid)
+                    .whenComplete(() {
+                  showSnackBar(
+                      context, 'You are now Friends with ${userModel.name}');
+                });
+              },
+              label: 'Accept Friend Request',
+              width: MediaQuery.of(context).size.width * 0.7,
+              backgroundColor: Theme.of(context).cardColor,
+              textColor: Theme.of(context).primaryColor);
+        } else if (userModel.friendsUIDs.contains(currentUser.uid)) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              buildElevatedButton(
+                onPressed: () async {
+                  // show unfriend dialog to confirm ask the user if they want to unfriend
+                  // create ȧ dialog to confirm logout
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text(
+                        'Unfriend',
+                        textAlign: TextAlign.center,
+                      ),
+                      content: Text(
+                        'Are you sure you want to Unfriend ${userModel.name}?',
+                        textAlign: TextAlign.center,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            // remove friend
+                            await context
+                                .read<AuthenticationProvider>()
+                                .removeFriend(friendId: userModel.uid)
+                                .whenComplete(() {
+                              showSnackBar(context,
+                                  'You are no longer friends with ${userModel.name}');
+                            });
+                          },
+                          child: const Text('Yes'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                label: 'Unfriend',
+                width: MediaQuery.of(context).size.width * 0.4,
+                backgroundColor:
+                    Theme.of(context).buttonTheme.colorScheme!.primary,
+                textColor: Colors.white,
+              ),
+              buildElevatedButton(
+                onPressed: () async {
+                  // navigate to chat screen
+                  // navigate to chat screen with the following arguments
+                  // 1. friend uid 2. friend name 3. friend image 4. group with an empty string
+                  Navigator.pushNamed(context, Constants.chatScreen,
+                      arguments: {
+                        Constants.contactUID: userModel.uid,
+                        Constants.contactName: userModel.name,
+                        Constants.contactImage: userModel.image,
+                        Constants.groupID: '',
+                      });
+                },
+                label: 'Chat',
+                width: MediaQuery.of(context).size.width * 0.4,
+                backgroundColor: Theme.of(context).cardColor,
+                textColor: Theme.of(context).primaryColor,
+              ),
+            ],
           );
         } else {
           // Show send friend request button
@@ -235,6 +323,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               });
             },
             label: 'Send Friend Request',
+            width: MediaQuery.of(context).size.width * 0.7,
+            backgroundColor: Theme.of(context).cardColor,
+            textColor: Theme.of(context).primaryColor,
           );
         }
       } else {
@@ -247,15 +338,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget buildElevatedButton({
     required VoidCallback onPressed,
     required String label,
+    required double width,
+    required Color backgroundColor,
+    required Color textColor,
   }) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.7,
+      width: width,
       child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(30),
+          ),
+        ),
         onPressed: onPressed,
         child: Text(
           label.toUpperCase(),
           style: GoogleFonts.openSans(
             fontWeight: FontWeight.bold,
+            color: textColor,
           ),
         ),
       ),

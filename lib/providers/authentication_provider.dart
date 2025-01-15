@@ -280,6 +280,58 @@ class AuthenticationProvider extends ChangeNotifier {
     });
   }
 
+  // remove friend uid form our friends list
+  Future<void> removeFriend({required String friendId}) async {
+    await _firestore.collection(Constants.users).doc(friendId).update({
+      Constants.friendsUIDs: FieldValue.arrayRemove([_uid])
+    });
+    await _firestore.collection(Constants.users).doc(_uid).update({
+      Constants.friendsUIDs: FieldValue.arrayRemove([friendId])
+    });
+  }
+
+  // get a list of friends
+  Future<List<UserModel>> getFriendsList(String uid) async {
+    List<UserModel> friendsList = [];
+
+    DocumentSnapshot documentSnapshot =
+        await _firestore.collection(Constants.users).doc(uid).get();
+
+    List<dynamic> friendsUIDs = documentSnapshot.get(Constants.friendsUIDs);
+
+    for (String friendId in friendsUIDs) {
+      DocumentSnapshot documentSnapshot =
+          await _firestore.collection(Constants.users).doc(friendId).get();
+      UserModel friend =
+          UserModel.fromMap(documentSnapshot.data() as Map<String, dynamic>);
+      friendsList.add(friend);
+    }
+    return friendsList;
+  }
+
+  // get a list of friend requests
+  Future<List<UserModel>> getFriendRequestsList(String uid) async {
+    List<UserModel> friendRequestsList = [];
+
+    DocumentSnapshot documentSnapshot =
+        await _firestore.collection(Constants.users).doc(uid).get();
+
+    List<dynamic> friendRequestsUIDs =
+        documentSnapshot.get(Constants.friendRequestsUIDs);
+
+    for (String friendRequestsUIDs in friendRequestsUIDs) {
+      DocumentSnapshot documentSnapshot = await _firestore
+          .collection(Constants.users)
+          .doc(friendRequestsUIDs)
+          .get();
+      UserModel friendRequest =
+          UserModel.fromMap(documentSnapshot.data() as Map<String, dynamic>);
+      friendRequestsList.add(friendRequest);
+    }
+
+    return friendRequestsList;
+  }
+
   Future logout() async {
     await _auth.signOut();
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
