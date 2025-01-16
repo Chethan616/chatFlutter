@@ -14,6 +14,7 @@ import 'package:flutter_chat_pro/main_screen/profile_screen.dart';
 import 'package:flutter_chat_pro/main_screen/settings_screen.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/constants.dart';
+import 'package:flutter_chat_pro/providers/chat_provider.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -27,6 +28,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
       ],
       child: MyApp(savedThemeMode: savedThemeMode),
     ),

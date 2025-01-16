@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
+import 'package:flutter_chat_pro/widgets/bottom_chat_field.dart';
 import 'package:flutter_chat_pro/widgets/chat_app_bar.dart';
+import 'package:flutter_chat_pro/widgets/chat_list.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -24,29 +26,28 @@ class _ChatScreenState extends State<ChatScreen> {
     final groupID = arguments[Constants.groupID];
     // check if the groupID is empty - then its a chat with a friend else its a group chat
     final isGroupChat = groupID.isNotEmpty ? true : false;
+
     return Scaffold(
       appBar: AppBar(
-        title: ChatAppBar(contactId: contactUID),
+        title: ChatAppBar(contactUID: contactUID),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: 20,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('message $index'),
-                ); // ListTile
-              },
-            ), // ListView.builder
-          ), // Expanded
-          TextFormField(
-            decoration: const InputDecoration(
-              hintText: 'Type a message',
-              suffixIcon: Icon(Icons.send),
-            ), // InputDecoration
-          ), // TextFormField
-        ],
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ChatList(
+                contactUID: contactUID,
+                groupID: groupID,
+              ),
+            ),
+            BottomChatField(
+                contactUID: contactUID,
+                contactName: contactName,
+                contactImage: contactImage,
+                groupID: groupID)
+          ],
+        ),
       ),
     );
   }

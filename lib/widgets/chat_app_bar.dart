@@ -4,11 +4,12 @@ import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/models/user_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 class ChatAppBar extends StatefulWidget {
-  const ChatAppBar({super.key, required this.contactId});
-  final String contactId;
+  const ChatAppBar({super.key, required this.contactUID});
+  final String contactUID;
 
   @override
   State<ChatAppBar> createState() => _ChatAppBarState();
@@ -20,7 +21,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
     return StreamBuilder(
       stream: context
           .read<AuthenticationProvider>()
-          .userStream(userId: widget.contactId),
+          .userStream(userId: widget.contactUID),
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.hasError) {
           return const Center(child: Text('Something went wrong'));
@@ -48,13 +49,18 @@ class _ChatAppBarState extends State<ChatAppBar> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(userModel.name),
-                const Text(
+                Text(userModel.name,
+                    style: GoogleFonts.openSans(
+                      fontSize: 16,
+                    )),
+                Text(
                   'Online',
                   // userModel.isOnline
                   //  ? 'Online'
                   //  : 'Last seen ${GlobalMethods.getLastSeen(userModel.lastSeen)}'),
-                  style: TextStyle(fontSize: 10),
+                  style: GoogleFonts.openSans(
+                    fontSize: 12,
+                  ),
                 ),
               ],
             ),

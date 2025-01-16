@@ -15,34 +15,35 @@ class _FriendsScreenState extends State<FriendsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: AppBarBackButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          centerTitle: true,
-          title: const Text('Friends'),
+      appBar: AppBar(
+        leading: AppBarBackButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              // cupertinosearchbar
-              CupertinoSearchTextField(
-                placeholder: 'Search',
-                style: const TextStyle(color: Colors.white),
-                onChanged: (value) {
-                  print(value);
-                },
-              ),
+        centerTitle: true,
+        title: const Text('Friends'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            // cupertinosearchbar
+            CupertinoSearchTextField(
+              placeholder: 'Search',
+              style: const TextStyle(color: Colors.white),
+              onChanged: (value) {
+                print(value);
+              },
+            ),
 
-              const Expanded(
-                  child: FriendsList(
-                viewType: FriendViewType.friends,
-              )),
-            ],
-          ),
-        ));
+            const Expanded(
+                child: FriendsList(
+              viewType: FriendViewType.friends,
+            )),
+          ],
+        ),
+      ),
+    );
   }
 }
