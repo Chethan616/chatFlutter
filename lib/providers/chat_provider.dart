@@ -1,5 +1,5 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
@@ -158,7 +158,7 @@ class ChatProvider extends ChangeNotifier {
               .doc(messageModel.senderUID)
               .collection(Constants.chats)
               .doc(contactUID),
-          contactLastMessage.toMap(),
+          senderLastMessage.toMap(),
         );
 
         // 6. send the last message to contact firestore location
@@ -173,6 +173,7 @@ class ChatProvider extends ChangeNotifier {
       });
 
 // 7. call onSucess
+      onSucess();
     } on FirebaseException catch (e) {
       onError(e.message ?? e.toString());
     } catch (e) {

@@ -67,17 +67,19 @@ Future<File?> pickImage({
   return fileImage;
 }
 
-SizedBox buildDateTime(groupByValue) {
-  return SizedBox(
-    child: Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          formatDate(groupByValue.timeSent, [dd, ' ', M, ',', yyyy]),
-          textAlign: TextAlign.center,
-          style: GoogleFonts.openSans(
-            fontWeight: FontWeight.bold,
+Center buildDateTime(groupByValue) {
+  return Center(
+    child: SizedBox(
+      child: Card(
+        elevation: 2,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text(
+            formatDate(groupByValue.timeSent, [dd, ' ', M, ',', yyyy]),
+            textAlign: TextAlign.center,
+            style: GoogleFonts.openSans(
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

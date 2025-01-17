@@ -23,7 +23,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // get the contactImage from the arguments
     final contactImage = arguments[Constants.contactImage];
     // get the groupID from the arguments
-    final groupID = arguments[Constants.groupID];
+    final groupID = arguments[Constants.groupId];
     // check if the groupID is empty - then its a chat with a friend else its a group chat
     final isGroupChat = groupID.isNotEmpty ? true : false;
 

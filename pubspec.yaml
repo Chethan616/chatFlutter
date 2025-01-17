@@ -51,7 +51,7 @@ dependencies:
   uuid: ^4.5.1
   date_format: ^2.0.9
   grouped_list: ^6.0.0
-
+  swipe_to: ^1.0.5
   rounded_loading_button:
     git:
       url: https://github.com/scopendo/flutter_rounded_loading_button.git

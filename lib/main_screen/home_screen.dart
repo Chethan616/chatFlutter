@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
-import 'package:flutter_chat_pro/main_screen/chats_list_screen.dart';
+import 'package:flutter_chat_pro/main_screen/my_chats_screen.dart';
 import 'package:flutter_chat_pro/main_screen/groups_screen.dart';
 import 'package:flutter_chat_pro/main_screen/people_screen.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
@@ -19,7 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PageController pageController = PageController();
   int currentIndex = 0;
   final List<Widget> pages = const [
-    ChatsListScreen(),
+    MyChatsScreen(),
     GroupsScreen(),
     PeopleScreen(),
   ];

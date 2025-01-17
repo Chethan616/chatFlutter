@@ -301,7 +301,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Constants.contactUID: userModel.uid,
                         Constants.contactName: userModel.name,
                         Constants.contactImage: userModel.image,
-                        Constants.groupID: '',
+                        Constants.groupId: '',
                       });
                 },
                 label: 'Chat',
@@ -346,6 +346,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       width: width,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
+          elevation: 5,
           backgroundColor: backgroundColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(30),

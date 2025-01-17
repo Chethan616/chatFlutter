@@ -66,7 +66,7 @@ class FriendsList extends StatelessWidget {
                               Constants.contactUID: data.uid,
                               Constants.contactName: data.name,
                               Constants.contactImage: data.image,
-                              Constants.groupID: '',
+                              Constants.groupId: '',
                             });
                       } else if (viewType == FriendViewType.friendRequests) {
                         // accept friend request

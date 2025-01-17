@@ -3,6 +3,7 @@ import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/providers/chat_provider.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
+import 'package:flutter_chat_pro/widgets/message_reply_preview.dart';
 import 'package:provider/provider.dart';
 
 class BottomChatField extends StatefulWidget {
@@ -65,63 +66,76 @@ class _BottomChatFieldState extends State<BottomChatField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(
-            color: Theme.of(context).primaryColor,
-          )),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                  context: context,
-                  builder: (context) {
-                    return Container(
-                        height: 200,
-                        child: const Center(
-                          child: Text('Attachment'),
-                        ));
-                  });
-            },
-            icon: const Icon(Icons.attachment),
-          ),
-          Expanded(
-            child: TextFormField(
-              controller: _textEditingController,
-              focusNode: _focusNode,
-              decoration: const InputDecoration.collapsed(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(30),
+    return Consumer<ChatProvider>(
+      builder: (context, chatProvider, child) {
+        final messageReply = chatProvider.messageReplyModel;
+        final isMessageReply = messageReply != null;
+        return Container(
+          decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary,
+              )),
+          child: Column(
+            children: [
+              isMessageReply
+                  ? const MessageReplyPreview()
+                  : const SizedBox.shrink(),
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return Container(
+                                height: 200,
+                                child: const Center(
+                                  child: Text('Attachment'),
+                                ));
+                          });
+                    },
+                    icon: const Icon(Icons.attachment),
                   ),
-                  borderSide: BorderSide.none,
-                ),
-                hintText: 'Type a message',
+                  Expanded(
+                    child: TextFormField(
+                      controller: _textEditingController,
+                      focusNode: _focusNode,
+                      decoration: const InputDecoration.collapsed(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(30),
+                          ),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: 'Type a message',
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: sendTextMessage,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(30),
+                        color: Colors.deepPurple,
+                      ),
+                      margin: const EdgeInsets.all(5),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Icon(
+                          Icons.arrow_upward,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
+            ],
           ),
-          GestureDetector(
-            onTap: sendTextMessage,
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(30),
-                color: Theme.of(context).primaryColor,
-              ),
-              margin: const EdgeInsets.all(5),
-              child: const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Icon(
-                  Icons.arrow_upward,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

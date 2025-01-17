@@ -37,7 +37,7 @@ class Constants {
 
   static const String contactName = 'contactName';
   static const String contactImage = 'contactImage';
-  static const String groupID = 'groupID';
+  static const String groupId = 'groupId';
 
   static const String senderUID = 'senderUID';
   static const String senderName = 'senderName';

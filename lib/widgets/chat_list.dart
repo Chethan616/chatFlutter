@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/models/message_model.dart';
+import 'package:flutter_chat_pro/models/message_reply_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/providers/chat_provider.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
@@ -71,7 +74,7 @@ class _ChatListState extends State<ChatList> {
               );
             },
             groupHeaderBuilder: (dynamic groupByValue) =>
-                buildDateTime(groupByValue),
+                SizedBox(height: 40, child: buildDateTime(groupByValue)),
             itemBuilder: (context, dynamic element) {
               // check if we sent the last message
               final isMe = element.senderUID == uid;
@@ -80,13 +83,40 @@ class _ChatListState extends State<ChatList> {
                       padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
                       child: MyMessageWidget(
                         message: element,
+                        onRightSwipe: () {
+                          // set the message reply to true
+                          final messageReply = MessageReplyModel(
+                            message: element.message,
+                            senderUID: element.senderUID,
+                            senderName: element.senderName,
+                            senderImage: element.senderImage,
+                            messageType: element.messageType,
+                            isMe: isMe,
+                          );
+                          context
+                              .read<ChatProvider>()
+                              .setMessageReplyModel(messageReply);
+                        },
                       ),
                     )
                   : Padding(
                       padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
                       child: ContactMessageWidget(
-                        message: element,
-                      ),
+                          message: element,
+                          onRightSwipe: () {
+                            // set the message reply to true
+                            final messageReply = MessageReplyModel(
+                              message: element.message,
+                              senderUID: element.senderUID,
+                              senderName: element.senderName,
+                              senderImage: element.senderImage,
+                              messageType: element.messageType,
+                              isMe: isMe,
+                            );
+                            context
+                                .read<ChatProvider>()
+                                .setMessageReplyModel(messageReply);
+                          }),
                     );
             },
             groupComparator: (value1, value2) => value2.compareTo(value1),
