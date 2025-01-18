@@ -230,12 +230,14 @@ class AuthenticationProvider extends ChangeNotifier {
     required String friendId,
   }) async {
     try {
+      // add our uid to friends request list
       await _firestore.collection(Constants.users).doc(friendId).update({
-        Constants.friendRequestsUIDs: FieldValue.arrayUnion([_uid])
+        Constants.friendRequestsUIDs: FieldValue.arrayUnion([_uid]),
       });
 
+      // add friend uid to our friend requests sent list
       await _firestore.collection(Constants.users).doc(_uid).update({
-        Constants.sentFriendRequestsUIDs: FieldValue.arrayUnion([friendId])
+        Constants.sentFriendRequestsUIDs: FieldValue.arrayUnion([friendId]),
       });
     } on FirebaseException catch (e) {
       print(e);
@@ -244,14 +246,14 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future<void> cancelFriendRequest({required String friendId}) async {
     try {
-      // remove our uid from friend request list
+      // remove our uid from friends request list
       await _firestore.collection(Constants.users).doc(friendId).update({
-        Constants.friendRequestsUIDs: FieldValue.arrayRemove([_uid])
+        Constants.friendRequestsUIDs: FieldValue.arrayRemove([_uid]),
       });
 
-      // remove friend uid from friend requests sent list
+      // remove friend uid from our friend requests sent list
       await _firestore.collection(Constants.users).doc(_uid).update({
-        Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([friendId])
+        Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([friendId]),
       });
     } on FirebaseException catch (e) {
       print(e);
@@ -261,32 +263,35 @@ class AuthenticationProvider extends ChangeNotifier {
   Future<void> acceptFriendRequest({required String friendId}) async {
     // add our uid to friends list
     await _firestore.collection(Constants.users).doc(friendId).update({
-      Constants.friendsUIDs: FieldValue.arrayUnion([_uid])
+      Constants.friendsUIDs: FieldValue.arrayUnion([_uid]),
     });
 
     // add friend uid to our friends list
     await _firestore.collection(Constants.users).doc(_uid).update({
-      Constants.friendsUIDs: FieldValue.arrayUnion([friendId])
+      Constants.friendsUIDs: FieldValue.arrayUnion([friendId]),
     });
 
-    // remove our uid from friend requests list
+    // remove our uid from friends request list
     await _firestore.collection(Constants.users).doc(friendId).update({
-      Constants.friendRequestsUIDs: FieldValue.arrayRemove([_uid])
+      Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([_uid]),
     });
 
     // remove friend uid from our friend requests sent list
     await _firestore.collection(Constants.users).doc(_uid).update({
-      Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([friendId])
+      Constants.friendRequestsUIDs: FieldValue.arrayRemove([friendId]),
     });
   }
 
-  // remove friend uid form our friends list
+  // remove friend
   Future<void> removeFriend({required String friendId}) async {
+    // remove our uid from friends list
     await _firestore.collection(Constants.users).doc(friendId).update({
-      Constants.friendsUIDs: FieldValue.arrayRemove([_uid])
+      Constants.friendsUIDs: FieldValue.arrayRemove([_uid]),
     });
+
+    // remove friend uid from our friends list
     await _firestore.collection(Constants.users).doc(_uid).update({
-      Constants.friendsUIDs: FieldValue.arrayRemove([friendId])
+      Constants.friendsUIDs: FieldValue.arrayRemove([friendId]),
     });
   }
 
