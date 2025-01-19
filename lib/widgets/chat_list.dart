@@ -16,10 +16,10 @@ class ChatList extends StatefulWidget {
   const ChatList({
     super.key,
     required this.contactUID,
-    required this.groupID,
+    required this.groupId,
   });
   final String contactUID;
-  final String groupID;
+  final String groupId;
 
   @override
   State<ChatList> createState() => _ChatListState();
@@ -47,7 +47,7 @@ class _ChatListState extends State<ChatList> {
         stream: context.read<ChatProvider>().getMessagesStream(
               userId: uid,
               contactUID: widget.contactUID,
-              isGroup: widget.groupID,
+              isGroup: widget.groupId,
             ),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
@@ -86,6 +86,7 @@ class _ChatListState extends State<ChatList> {
           if (snapshot.hasData) {
             final messagesList = snapshot.data!;
             return GroupedListView<dynamic, DateTime>(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               reverse: true,
               controller: _scrollController,
               elements: messagesList,
@@ -99,6 +100,17 @@ class _ChatListState extends State<ChatList> {
               groupHeaderBuilder: (dynamic groupByValue) =>
                   SizedBox(height: 40, child: buildDateTime(groupByValue)),
               itemBuilder: (context, dynamic element) {
+                // set message as seen
+                if (!element.isSeen && element.senderUID != uid) {
+                  print('working');
+                  context.read<ChatProvider>().setMessageAsSeen(
+                        userId: uid,
+                        contactUID: widget.contactUID,
+                        messageId: element.messageId,
+                        groupId: widget.groupId,
+                      );
+                }
+
                 // check if we sent the last message
                 final isMe = element.senderUID == uid;
                 return isMe

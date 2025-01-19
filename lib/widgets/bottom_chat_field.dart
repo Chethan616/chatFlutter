@@ -1,9 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/providers/chat_provider.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
 import 'package:flutter_chat_pro/widgets/message_reply_preview.dart';
+import 'package:flutter_sound_record/flutter_sound_record.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+
 import 'package:provider/provider.dart';
 
 class BottomChatField extends StatefulWidget {
@@ -25,12 +32,20 @@ class BottomChatField extends StatefulWidget {
 }
 
 class _BottomChatFieldState extends State<BottomChatField> {
+  FlutterSoundRecord? _soundRecord;
   late TextEditingController _textEditingController;
   late FocusNode _focusNode;
+  File? finalFileImage;
+  String filePath = '';
+
+  bool isRecording = false;
+  bool isShowSendButton = false;
+  bool isSendingAudio = false;
 
   @override
   void initState() {
     _textEditingController = TextEditingController();
+    _soundRecord = FlutterSoundRecord();
     _focusNode = FocusNode();
     super.initState();
   }
@@ -38,8 +53,134 @@ class _BottomChatFieldState extends State<BottomChatField> {
   @override
   void dispose() {
     _textEditingController.dispose();
+    _soundRecord?.dispose();
     _focusNode.dispose();
     super.dispose();
+  }
+
+  // check microphone permission
+  Future<bool> checkMicrophonePermission() async {
+    bool hasPermission = await Permission.microphone.isGranted;
+    final status = await Permission.microphone.request();
+    if (status == PermissionStatus.granted) {
+      hasPermission = true;
+    } else {
+      hasPermission = false;
+    }
+
+    return hasPermission;
+  }
+
+  // start recording audio
+  void startRecording() async {
+    final hasPermission = await checkMicrophonePermission();
+    if (hasPermission) {
+      var tempDir = await getTemporaryDirectory();
+      filePath = '${tempDir.path}/flutter_sound.aac';
+      await _soundRecord!.start(
+        path: filePath,
+      );
+      setState(() {
+        isRecording = true;
+      });
+    }
+  }
+
+  // stop recording audio
+  void stopRecording() async {
+    await _soundRecord!.stop();
+    setState(() {
+      isRecording = false;
+      isShowSendButton = true;
+    });
+    // send audio message too firestore
+    sendFileMessage(
+      messageType: MessageEnum.audio,
+    );
+  }
+
+  void selectImage(bool fromCamera) async {
+    finalFileImage = await pickImage(
+      fromCamera: fromCamera,
+      onFail: (String message) {
+        showSnackBar(context, message);
+      },
+    );
+
+    // Crop image
+    await cropImage(finalFileImage?.path);
+
+    popContext();
+  }
+
+  // select a video file from device
+  void selectVideo() async {
+    File? fileVideo = await pickVideo(
+      onFail: (String message) {
+        showSnackBar(context, message);
+      },
+    );
+
+    popContext();
+
+    if (fileVideo != null) {
+      filePath = fileVideo.path;
+      // send video message to firestore
+      sendFileMessage(
+        messageType: MessageEnum.video,
+      );
+    }
+  }
+
+  popContext() {
+    Navigator.pop(context);
+  }
+
+  Future<void> cropImage(croppedFilePath) async {
+    if (croppedFilePath != null) {
+      CroppedFile? croppedFile = await ImageCropper().cropImage(
+        sourcePath: croppedFilePath,
+        maxHeight: 800,
+        maxWidth: 800,
+        compressQuality: 90,
+      );
+
+      if (croppedFile != null) {
+        filePath = croppedFile.path;
+        // send image messsage to firestore
+        sendFileMessage(
+          messageType: MessageEnum.image,
+        );
+      }
+    }
+  }
+
+  // send image message to firestore
+  void sendFileMessage({required MessageEnum messageType}) {
+    final currentUser = context.read<AuthenticationProvider>().userModel!;
+    final chatProvider = context.read<ChatProvider>();
+
+    chatProvider.sendFileMessage(
+        sender: currentUser,
+        contactUID: widget.contactUID,
+        contactName: widget.contactName,
+        contactImage: widget.contactImage,
+        file: File(filePath),
+        messageType: messageType,
+        groupId: widget.groupID,
+        onSucess: () {
+          _textEditingController.clear();
+          _focusNode.unfocus();
+          setState(() {
+            isSendingAudio = false;
+          });
+        },
+        onError: (error) {
+          setState(() {
+            isSendingAudio = false;
+          });
+          showSnackBar(context, error);
+        });
   }
 
   // send text message to firestore
@@ -57,7 +198,7 @@ class _BottomChatFieldState extends State<BottomChatField> {
         groupId: widget.groupID,
         onSucess: () {
           _textEditingController.clear();
-          _focusNode.requestFocus();
+          _focusNode.unfocus();
         },
         onError: (error) {
           showSnackBar(context, error);
@@ -85,17 +226,47 @@ class _BottomChatFieldState extends State<BottomChatField> {
               Row(
                 children: [
                   IconButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                          context: context,
-                          builder: (context) {
-                            return Container(
-                                height: 200,
-                                child: const Center(
-                                  child: Text('Attachment'),
-                                ));
-                          });
-                    },
+                    onPressed: isSendingAudio
+                        ? null
+                        : () {
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return SizedBox(
+                                      height: 200,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          children: [
+                                            // select image from camera
+                                            ListTile(
+                                              leading: const Icon(
+                                                  Icons.camera_alt_rounded),
+                                              title: const Text('Camera'),
+                                              onTap: () {
+                                                selectImage(true);
+                                              },
+                                            ),
+                                            // select image from gallery
+                                            ListTile(
+                                              leading: const Icon(Icons.image),
+                                              title: const Text('Gallery'),
+                                              onTap: () {
+                                                selectImage(false);
+                                              },
+                                            ),
+                                            // select a video file from device
+                                            ListTile(
+                                              leading: const Icon(
+                                                  Icons.video_library_rounded),
+                                              title: const Text('Video'),
+                                              onTap: selectVideo,
+                                            ),
+                                          ],
+                                        ),
+                                      ));
+                                });
+                          },
                     icon: const Icon(Icons.attachment),
                   ),
                   Expanded(
@@ -111,25 +282,42 @@ class _BottomChatFieldState extends State<BottomChatField> {
                         ),
                         hintText: 'Type a message',
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          isShowSendButton = value.isNotEmpty;
+                        });
+                      },
                     ),
                   ),
-                  GestureDetector(
-                    onTap: sendTextMessage,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(30),
-                        color: Colors.deepPurple,
-                      ),
-                      margin: const EdgeInsets.all(5),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Icon(
-                          Icons.arrow_upward,
-                          color: Colors.white,
+                  chatProvider.isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : GestureDetector(
+                          onTap: isShowSendButton ? sendTextMessage : null,
+                          onLongPress: isShowSendButton ? null : startRecording,
+                          onLongPressUp: stopRecording,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(30),
+                              color: Colors.deepPurple,
+                            ),
+                            margin: const EdgeInsets.all(5),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: isShowSendButton
+                                  ? const Icon(
+                                      Icons.arrow_upward,
+                                      color: Colors.white,
+                                    )
+                                  : const Icon(
+                                      Icons.mic,
+                                      color: Colors.white,
+                                    ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ],

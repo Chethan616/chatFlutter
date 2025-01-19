@@ -38,7 +38,7 @@ class _ChatScreenState extends State<ChatScreen> {
             Expanded(
               child: ChatList(
                 contactUID: contactUID,
-                groupID: groupID,
+                groupId: groupID,
               ),
             ),
             BottomChatField(

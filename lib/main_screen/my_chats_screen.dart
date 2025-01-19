@@ -68,10 +68,9 @@ class _MyChatsScreenState extends State<MyChatsScreen> {
                             ),
                             contentPadding: EdgeInsets.zero,
                             title: Text(chat.contactName),
-                            subtitle: Text(
-                              lastMessage,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            subtitle: messageToShow(
+                              type: chat.messageType,
+                              message: lastMessage,
                             ),
                             trailing: Text(dateTime),
                             onTap: () {
