@@ -10,6 +10,7 @@ class DisplayMessageType extends StatelessWidget {
     required this.message,
     required this.type,
     required this.color,
+    required this.isReply,
     this.maxLines,
     this.overFlow,
   });
@@ -17,6 +18,7 @@ class DisplayMessageType extends StatelessWidget {
   final String message;
   final MessageEnum type;
   final Color color;
+  final bool isReply;
   final int? maxLines;
   final TextOverflow? overFlow;
 
@@ -35,21 +37,27 @@ class DisplayMessageType extends StatelessWidget {
             overflow: overFlow,
           );
         case MessageEnum.image:
-          return CachedNetworkImage(
-            imageUrl: message,
-            fit: BoxFit.cover,
-          );
+          return isReply
+              ? const Icon(Icons.image)
+              : CachedNetworkImage(
+                  imageUrl: message,
+                  fit: BoxFit.cover,
+                );
         case MessageEnum.video:
-          return VideoPlayerWidget(
-            videoUrl: message,
-            color: color,
-          );
+          return isReply
+              ? const Icon(Icons.video_collection)
+              : VideoPlayerWidget(
+                  videoUrl: message,
+                  color: color,
+                );
 
         case MessageEnum.audio:
-          return AudioPlayerWidget(
-            audioUrl: message,
-            color: color,
-          );
+          return isReply
+              ? const Icon(Icons.audiotrack_outlined)
+              : AudioPlayerWidget(
+                  audioUrl: message,
+                  color: color,
+                );
         default:
           return Text(
             message,

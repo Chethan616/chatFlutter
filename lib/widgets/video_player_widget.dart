@@ -18,6 +18,7 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late CachedVideoPlayerPlusController cachedVideoPlayerPlusController;
   bool isPlaying = false;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -27,6 +28,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       ..addListener(() {})
       ..initialize().then((_) {
         cachedVideoPlayerPlusController.setVolume(1);
+        setState(() {
+          isLoading = false;
+        });
       });
     super.initState();
   }
@@ -40,10 +44,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 10 / 10,
+      aspectRatio: 16 / 16,
       child: Stack(
         children: [
-          CachedVideoPlayerPlus(cachedVideoPlayerPlusController),
+          isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : CachedVideoPlayerPlus(cachedVideoPlayerPlusController),
           Center(
             child: IconButton(
               icon: Icon(
