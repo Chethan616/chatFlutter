@@ -1,16 +1,40 @@
-# flutter_chat_pro
 
-A new Flutter project.
+A modern chat application built with Flutter and Firebase, providing a seamless real-time messaging experience.
 
-## Getting Started
+Features
 
-This project is a starting point for a Flutter application.
+Authentication: phone number and otp
 
-A few resources to get you started if this is your first Flutter project:
+Real-Time Messaging: 1:1
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Multimedia Support: Send/receive images, videos, and audio messages.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Voice Recording: Record and share voice messages directly in the chat.
+
+
+How to Run
+
+1. Clone this repository.
+
+
+2. Run flutter pub get to install dependencies.
+
+
+3. Set up Firebase for the app (Android/iOS&Web).
+
+
+4. Run flutter run to launch the app.
+
+
+
+Tech Stack
+
+Flutter for frontend.
+
+Firebase for backend (Firestore, Storage, Authentication).
+
+
+Contribution
+
+Contributions are welcome! Feel free to submit issues or pull requests.
+
