@@ -8,6 +8,7 @@ import 'package:flutter_chat_pro/providers/chat_provider.dart';
 import 'package:flutter_chat_pro/utilities/global_methods.dart';
 import 'package:flutter_chat_pro/widgets/contact_message_widget.dart';
 import 'package:flutter_chat_pro/widgets/my_message_widget.dart';
+import 'package:flutter_chat_pro/widgets/reactions_dialog.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:grouped_list/grouped_list.dart';
 import 'package:provider/provider.dart';
@@ -33,6 +34,18 @@ class _ChatListState extends State<ChatList> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  showReactionsDialog({required MessageModel message, required String uid}) {
+    showDialog(
+      context: context,
+      builder: (context) => ReactionsDialog(
+        uid: uid,
+        message: message,
+        onReactionsTap: (reaction) {},
+        onContextMenuTap: (item) {},
+      ),
+    );
   }
 
   @override
@@ -114,24 +127,29 @@ class _ChatListState extends State<ChatList> {
                 // check if we sent the last message
                 final isMe = element.senderUID == uid;
                 return isMe
-                    ? Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
-                        child: MyMessageWidget(
-                          message: element,
-                          onRightSwipe: () {
-                            // set the message reply to true
-                            final messageReply = MessageReplyModel(
-                              message: element.message,
-                              senderUID: element.senderUID,
-                              senderName: element.senderName,
-                              senderImage: element.senderImage,
-                              messageType: element.messageType,
-                              isMe: isMe,
-                            );
-                            context
-                                .read<ChatProvider>()
-                                .setMessageReplyModel(messageReply);
-                          },
+                    ? InkWell(
+                        onLongPress: () {
+                          showReactionsDialog(message: element, uid: uid);
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0, top: 8.0),
+                          child: MyMessageWidget(
+                            message: element,
+                            onRightSwipe: () {
+                              // set the message reply to true
+                              final messageReply = MessageReplyModel(
+                                message: element.message,
+                                senderUID: element.senderUID,
+                                senderName: element.senderName,
+                                senderImage: element.senderImage,
+                                messageType: element.messageType,
+                                isMe: isMe,
+                              );
+                              context
+                                  .read<ChatProvider>()
+                                  .setMessageReplyModel(messageReply);
+                            },
+                          ),
                         ),
                       )
                     : Padding(

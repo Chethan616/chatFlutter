@@ -61,7 +61,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  // update user status
+// update user status
   Future<void> updateUserStatus({required bool value}) async {
     await _firestore
         .collection(Constants.users)
