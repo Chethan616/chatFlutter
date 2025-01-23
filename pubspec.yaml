@@ -61,6 +61,8 @@ dependencies:
   cached_video_player_plus: ^3.0.3
   #cached_video_player: ^2.0.4
   #video_cached_player: ^2.4.9+1
+  emoji_picker_flutter: ^4.3.0
+  animate_do: ^3.3.4
 
   rounded_loading_button:
     git:

@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_chat_pro/models/message_model.dart';
 import 'package:flutter_chat_pro/models/message_reply_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
@@ -36,14 +38,92 @@ class _ChatListState extends State<ChatList> {
     super.dispose();
   }
 
+  void onContextMenuClicked(
+      {required String item, required MessageModel message}) {
+    switch (item) {
+      case 'Reply':
+
+        // set the message reply to true
+        final messageReply = MessageReplyModel(
+          message: message.message,
+          senderUID: message.senderUID,
+          senderName: message.senderName,
+          senderImage: message.senderImage,
+          messageType: message.messageType,
+          isMe: true,
+        );
+        context.read<ChatProvider>().setMessageReplyModel(messageReply);
+        break;
+      case 'Copy':
+        // copy message to clipboard
+        Clipboard.setData(ClipboardData(text: message.message));
+        showSnackBar(context, 'Message copied to clipboard');
+        break;
+      case 'Delete':
+        // TODO delete message
+        // context.read<ChatProvider>().deleteMessage(
+        //       userId: uid,
+        //       contactUID: widget.contactUID,
+        //       messageId: message.messageId,
+        //       groupId: widget.groupId,
+        //     );
+        break;
+    }
+  }
+
   showReactionsDialog({required MessageModel message, required String uid}) {
     showDialog(
       context: context,
       builder: (context) => ReactionsDialog(
         uid: uid,
         message: message,
-        onReactionsTap: (reaction) {},
-        onContextMenuTap: (item) {},
+        onReactionsTap: (reaction) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.pop(context);
+            print('pressed$reaction');
+            // if its a plus reacttion show bottom with emoji keyboard
+            if (reaction == '➕') {
+              // TODO: show emoji keyboard
+              showEmojiContainer();
+              // showEmojiKeyboard(
+              //     context: context,
+              //     onEmojiSelected: (emoji) {
+              //         // add emoji to message
+              //         context
+              //             .read<ChatProvider>()
+              //             .addEmojiToMessage(emoji: emoji, message: message);
+              //     },
+              // );
+            } else {
+              //     // TODO: add reaction to message
+              //     // context
+              //     //     .read<ChatProvider>()
+              //     //     .addReactionToMessage(reaction: reaction, message: message);
+            }
+          });
+        },
+        onContextMenuTap: (item) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.pop(context);
+            onContextMenuClicked(item: item, message: message);
+          });
+        },
+      ),
+    );
+  }
+
+  void showEmojiContainer() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Container(
+        height: 300,
+        child: EmojiPicker(
+          onEmojiSelected: (category, emoji) {
+            Navigator.pop(context);
+            print(emoji);
+            //TODO add emoji to message
+          },
+        ),
       ),
     );
   }
