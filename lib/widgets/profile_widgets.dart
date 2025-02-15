@@ -215,7 +215,7 @@ class FriendsButton extends StatelessWidget {
                   backgroundColor: Colors.deepPurple,
                   textColor: Colors.white,
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 5),
                 MyElevatedButton(
                   onPressed: () async {
                     // navigate to chat screen
@@ -229,7 +229,7 @@ class FriendsButton extends StatelessWidget {
                           Constants.groupId: ''
                         });
                   },
-                  label: 'Chat',
+                  label: 'chat',
                   width: MediaQuery.of(context).size.width * 0.4,
                   backgroundColor: Theme.of(context).cardColor,
                   textColor: Theme.of(context).colorScheme.primary,

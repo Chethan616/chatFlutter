@@ -15,124 +15,144 @@ class UserInformationScreen extends StatefulWidget {
 }
 
 class _UserInformationScreenState extends State<UserInformationScreen> {
-  // final RoundedLoadingButtonController _btnController =
-  //     RoundedLoadingButtonController();
   final TextEditingController _nameController = TextEditingController();
 
   @override
   void dispose() {
-    //_btnController.stop();
     _nameController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final AuthenticationProvider authentication =
         context.watch<AuthenticationProvider>();
+
     return Scaffold(
       appBar: MyAppBar(
         title: const Text('User Information'),
         onPressed: () => Navigator.of(context).pop(),
       ),
-      body: Center(
-          child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 20.0,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: isDark
+                ? [
+                    Colors.blue.shade900, // Dark blue
+                    Colors.blue.shade800, // Darker blue
+                  ]
+                : [
+                    Colors.white, // White
+                    Colors.blue.shade100, // Light blue
+                  ],
+          ),
         ),
-        child: Column(
-          children: [
-            DisplayUserImage(
-              finalFileImage: authentication.finalFileImage,
-              radius: 60,
-              onPressed: () {
-                authentication.showBottomSheet(
-                    context: context, onSuccess: () {});
-              },
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: _nameController,
-              maxLength: 20,
-              decoration: const InputDecoration(
-                hintText: 'Enter your name',
-                labelText: 'Enter your name',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(8),
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+            child: Column(
+              children: [
+                // User Image
+                DisplayUserImage(
+                  finalFileImage: authentication.finalFileImage,
+                  radius: 60,
+                  onPressed: () {
+                    authentication.showBottomSheet(
+                        context: context, onSuccess: () {});
+                  },
+                ),
+                const SizedBox(height: 30),
+
+                // Name Input Field
+                TextField(
+                  controller: _nameController,
+                  maxLength: 20,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Enter your name',
+                    labelText: 'Enter your name',
+                    hintStyle: TextStyle(
+                      color: isDark ? Colors.white54 : Colors.black54,
+                    ),
+                    labelStyle: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: isDark ? Colors.white54 : Colors.black54,
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 40),
-            Container(
-              width: double.infinity,
-              height: 50,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: MaterialButton(
-                onPressed: context.read<AuthenticationProvider>().isLoading
-                    ? null
-                    : () {
-                        if (_nameController.text.isEmpty ||
-                            _nameController.text.length < 3) {
-                          GlobalMethods.showSnackBar(
-                              context, 'Please enter your name');
-                          return;
-                        }
-                        // save user data to firestore
-                        saveUserDataToFireStore();
-                      },
-                child: context.watch<AuthenticationProvider>().isLoading
-                    ? const CircularProgressIndicator(
-                        color: Colors.orangeAccent,
-                      )
-                    : const Text(
-                        'Continue',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 1.5),
-                      ),
-              ),
+                const SizedBox(height: 40),
 
-              // RoundedLoadingButton(
-              //   controller: _btnController,
-              //   onPressed: () {
-              //     if (_nameController.text.isEmpty ||
-              //         _nameController.text.length < 3) {
-              //       showSnackBar(context, 'Please enter your name');
-              //       _btnController.reset();
-              //       return;
-              //     }
-              //     // save user data to firestore
-              //     saveUserDataToFireStore();
-              //   },
-              //   successIcon: Icons.check,
-              //   successColor: Colors.green,
-              //   errorColor: Colors.red,
-              //   color: Theme.of(context).primaryColor,
-              //   child: const Text(
-              //     'Continue',
-              //     style: TextStyle(
-              //       color: Colors.white,
-              //       fontSize: 16,
-              //       fontWeight: FontWeight.w500,
-              //     ),
-              //   ),
-              // ),
+                // Continue Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: authentication.isLoading
+                        ? null
+                        : () {
+                            if (_nameController.text.isEmpty ||
+                                _nameController.text.length < 3) {
+                              GlobalMethods.showSnackBar(
+                                context,
+                                'Please enter your name',
+                              );
+                              return;
+                            }
+                            saveUserDataToFireStore();
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      elevation: 5,
+                    ),
+                    child: authentication.isLoading
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : const Text(
+                            'Continue',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      )),
+      ),
     );
   }
 
-  // save user data to firestore
+  // Save user data to Firestore
   void saveUserDataToFireStore() async {
     final authProvider = context.read<AuthenticationProvider>();
 
@@ -153,11 +173,9 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
 
     authProvider.saveUserDataToFireStore(
       userModel: userModel,
-      //fileImage: finalFileImage,
       onSuccess: () async {
-        // save user data to shared preferences
+        // Save user data to shared preferences
         await authProvider.saveUserDataToSharedPreferences();
-
         navigateToHomeScreen();
       },
       onFail: () async {
@@ -166,8 +184,8 @@ class _UserInformationScreenState extends State<UserInformationScreen> {
     );
   }
 
+  // Navigate to Home Screen
   void navigateToHomeScreen() {
-    // navigate to home screen and remove all previous screens
     Navigator.of(context).pushNamedAndRemoveUntil(
       Constants.homeScreen,
       (route) => false,

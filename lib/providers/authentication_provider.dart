@@ -431,25 +431,45 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future<void> acceptFriendRequest({required String friendID}) async {
-    // add our uid to friends list
-    await _firestore.collection(Constants.users).doc(friendID).update({
-      Constants.friendsUIDs: FieldValue.arrayUnion([_uid]),
-    });
+    final userRef = _firestore.collection(Constants.users).doc(_uid);
+    final friendRef = _firestore.collection(Constants.users).doc(friendID);
 
-    // add friend uid to our friends list
-    await _firestore.collection(Constants.users).doc(_uid).update({
-      Constants.friendsUIDs: FieldValue.arrayUnion([friendID]),
-    });
+    try {
+      await _firestore.runTransaction((transaction) async {
+        final userSnapshot = await transaction.get(userRef);
+        final friendSnapshot = await transaction.get(friendRef);
 
-    // remove our uid from friends request list
-    await _firestore.collection(Constants.users).doc(friendID).update({
-      Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([_uid]),
-    });
+        if (!userSnapshot.exists || !friendSnapshot.exists) return;
 
-    // remove friend uid from our friend requests sent list
-    await _firestore.collection(Constants.users).doc(_uid).update({
-      Constants.friendRequestsUIDs: FieldValue.arrayRemove([friendID]),
-    });
+        // Update both users' friends lists
+        transaction.update(userRef, {
+          Constants.friendsUIDs: FieldValue.arrayUnion([friendID]),
+        });
+        transaction.update(friendRef, {
+          Constants.friendsUIDs: FieldValue.arrayUnion([_uid]),
+        });
+
+        // Remove from requests
+        transaction.update(userRef, {
+          Constants.friendRequestsUIDs: FieldValue.arrayRemove([friendID]),
+        });
+        transaction.update(friendRef, {
+          Constants.sentFriendRequestsUIDs: FieldValue.arrayRemove([_uid]),
+        });
+      });
+
+      // Update local state immediately
+      _userModel!.friendRequestsUIDs.remove(friendID);
+      _userModel!.friendsUIDs.add(friendID);
+
+      // Update shared preferences
+      await saveUserDataToSharedPreferences();
+
+      notifyListeners(); // Trigger UI update
+    } catch (e) {
+      log('Error accepting friend request: $e');
+      rethrow;
+    }
   }
 
   // remove friend

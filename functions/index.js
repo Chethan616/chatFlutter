@@ -493,4 +493,3 @@ exports.sendFriendRequestNotification = functions.firestore.document(
   }
 }
 
-

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "flutterchatpro-7ee3f"
-  }
+    "default": "flutterchat-e1738",
+    "chatapp": "flutterchat-e1738"
+  },
+  "targets": {},
+  "etags": {}
 }

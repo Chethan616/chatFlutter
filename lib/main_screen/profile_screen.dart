@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/models/user_model.dart';
 import 'package:flutter_chat_pro/providers/authentication_provider.dart';
-import 'package:flutter_chat_pro/utilities/global_methods.dart';
 import 'package:flutter_chat_pro/utilities/my_dialogs.dart';
 import 'package:flutter_chat_pro/widgets/my_app_bar.dart';
 import 'package:flutter_chat_pro/widgets/info_details_card.dart';
-import 'package:flutter_chat_pro/widgets/settings_list_tile.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:open_settings/open_settings.dart';
@@ -23,22 +21,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   bool isDarkMode = false;
 
-  // get the saved theme mode
   void getThemeMode() async {
-    // get the saved theme mode
     final savedThemeMode = await AdaptiveTheme.getThemeMode();
-    // check if the saved theme mode is dark
-    if (savedThemeMode == AdaptiveThemeMode.dark) {
-      // set the isDarkMode to true
-      setState(() {
-        isDarkMode = true;
-      });
-    } else {
-      // set the isDarkMode to false
-      setState(() {
-        isDarkMode = false;
-      });
-    }
+    setState(() {
+      isDarkMode = savedThemeMode == AdaptiveThemeMode.dark;
+    });
   }
 
   @override
@@ -49,225 +36,237 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // get user data from arguments
-    final uid = ModalRoute.of(context)!.settings.arguments as String;
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.white : Colors.black87;
+
+    final Object? args = ModalRoute.of(context)?.settings.arguments;
+    if (args == null || args is! String) {
+      return _buildErrorScreen(textColor);
+    }
+
+    final uid = args as String;
     final authProvider = context.watch<AuthenticationProvider>();
-    bool isMyProfile = uid == authProvider.uid;
+    final bool isMyProfile = uid == authProvider.uid;
+
     return authProvider.isLoading
-        ? const Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text('Saving Image, Please wait...')
-                ],
-              ),
-            ),
-          )
+        ? _buildLoadingScreen(isDark, textColor)
         : Scaffold(
             appBar: MyAppBar(
-              title: const Text('Profile'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
+              title: Text(
+                'Profile',
+                style: GoogleFonts.poppins(
+                  color: textColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
-            body: StreamBuilder(
-              stream: context
-                  .read<AuthenticationProvider>()
-                  .userStream(userID: uid),
-              builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-                if (snapshot.hasError) {
-                  return const Center(child: Text('Something went wrong'));
-                }
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [Colors.blue.shade900, Colors.blue.shade800]
+                      : [Colors.white, Colors.blue.shade100],
+                ),
+              ),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: authProvider.userStream(userID: uid),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) return _buildErrorWidget(textColor);
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoadingIndicator();
+                  }
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+                  final userModel = UserModel.fromMap(
+                      snapshot.data!.data() as Map<String, dynamic>);
 
-                final userModel = UserModel.fromMap(
-                    snapshot.data!.data() as Map<String, dynamic>);
-
-                return SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0,
-                      vertical: 20,
+                  return SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          InfoDetailsCard(userModel: userModel),
+                          const SizedBox(height: 25),
+                          if (isMyProfile) ...[
+                            _buildSettingsHeader(textColor),
+                            const SizedBox(height: 20),
+                            _buildSettingsCard([
+                              _buildSettingsTile(
+                                title: 'Account',
+                                icon: Icons.person,
+                                color: Colors.deepPurple,
+                              ),
+                              _buildSettingsTile(
+                                title: 'My Media',
+                                icon: Icons.photo_library,
+                                color: Colors.green,
+                              ),
+                              _buildSettingsTile(
+                                title: 'Notifications',
+                                icon: Icons.notifications,
+                                color: Colors.red,
+                                onTap: () =>
+                                    OpenSettings.openAppNotificationSetting(),
+                              ),
+                            ]),
+                            const SizedBox(height: 20),
+                            _buildSettingsCard([
+                              _buildSettingsTile(
+                                title: 'Help Center',
+                                icon: Icons.help_center,
+                                color: Colors.amber,
+                              ),
+                              _buildSettingsTile(
+                                title: 'Share App',
+                                icon: Icons.share,
+                                color: Colors.blue,
+                              ),
+                            ]),
+                            const SizedBox(height: 20),
+                            _buildThemeSwitchTile(isDark),
+                            const SizedBox(height: 20),
+                            _buildLogoutCard(),
+                          ],
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        InfoDetailsCard(
-                          userModel: userModel,
-                        ),
-                        const SizedBox(height: 10),
-                        isMyProfile
-                            ? Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                      'Settings',
-                                      style: GoogleFonts.openSans(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Card(
-                                    child: Column(
-                                      children: [
-                                        SettingsListTile(
-                                          title: 'Account',
-                                          icon: Icons.person,
-                                          iconContainerColor: Colors.deepPurple,
-                                          onTap: () {
-                                            // navigate to account settings
-                                          },
-                                        ),
-                                        SettingsListTile(
-                                          title: 'My Media',
-                                          icon: Icons.image,
-                                          iconContainerColor: Colors.green,
-                                          onTap: () {
-                                            // navigate to account settings
-                                          },
-                                        ),
-                                        SettingsListTile(
-                                          title: 'Notifications',
-                                          icon: Icons.notifications,
-                                          iconContainerColor: Colors.red,
-                                          onTap: () {
-                                            // navigate to account settings
-                                            OpenSettings
-                                                .openAppNotificationSetting();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Card(
-                                    child: Column(
-                                      children: [
-                                        SettingsListTile(
-                                          title: 'Help',
-                                          icon: Icons.help,
-                                          iconContainerColor: Colors.yellow,
-                                          onTap: () {
-                                            // navigate to account settings
-                                          },
-                                        ),
-                                        SettingsListTile(
-                                          title: 'Share',
-                                          icon: Icons.share,
-                                          iconContainerColor: Colors.blue,
-                                          onTap: () {
-                                            // navigate to account settings
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Card(
-                                    child: ListTile(
-                                      contentPadding: const EdgeInsets.only(
-                                        // added padding for the list tile
-                                        left: 8.0,
-                                        right: 8.0,
-                                      ),
-                                      leading: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.deepPurple,
-                                          borderRadius:
-                                              BorderRadius.circular(10),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Icon(
-                                            isDarkMode
-                                                ? Icons.nightlight_round
-                                                : Icons.wb_sunny_rounded,
-                                            color: isDarkMode
-                                                ? Colors.black
-                                                : Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                      title: const Text('Change theme'),
-                                      trailing: Switch(
-                                          value: isDarkMode,
-                                          onChanged: (value) {
-                                            // set the isDarkMode to the value
-                                            setState(() {
-                                              isDarkMode = value;
-                                            });
-                                            // check if the value is true
-                                            if (value) {
-                                              // set the theme mode to dark
-                                              AdaptiveTheme.of(context)
-                                                  .setDark();
-                                            } else {
-                                              // set the theme mode to light
-                                              AdaptiveTheme.of(context)
-                                                  .setLight();
-                                            }
-                                          }),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Card(
-                                    child: Column(
-                                      children: [
-                                        SettingsListTile(
-                                          title: 'Logout',
-                                          icon: Icons.logout_outlined,
-                                          iconContainerColor: Colors.red,
-                                          onTap: () {
-                                            MyDialogs.showMyAnimatedDialog(
-                                              context: context,
-                                              title: 'Logout',
-                                              content:
-                                                  'Are you sure you want to logout?',
-                                              textAction: 'Logout',
-                                              onActionTap:
-                                                  (value, updatedText) {
-                                                if (value) {
-                                                  // logout
-                                                  context
-                                                      .read<
-                                                          AuthenticationProvider>()
-                                                      .logout()
-                                                      .whenComplete(() {
-                                                    Navigator.pop(context);
-                                                    Navigator
-                                                        .pushNamedAndRemoveUntil(
-                                                      context,
-                                                      Constants.loginScreen,
-                                                      (route) => false,
-                                                    );
-                                                  });
-                                                }
-                                              },
-                                            );
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              )
-                            : const SizedBox(),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
+  }
+
+  Widget _buildErrorScreen(Color textColor) {
+    return Scaffold(
+      body: Center(
+        child: Text(
+          'Profile not found',
+          style: TextStyle(color: textColor, fontSize: 18),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingScreen(bool isDark, Color textColor) {
+    return Scaffold(
+      backgroundColor: isDark ? Colors.grey.shade900 : Colors.blue.shade50,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Theme.of(context).primaryColor),
+            const SizedBox(height: 20),
+            Text('Saving Image, Please wait...',
+                style: TextStyle(color: textColor, fontSize: 16)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(Color textColor) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, color: Colors.red.shade400, size: 50),
+          const SizedBox(height: 20),
+          Text('Failed to load profile',
+              style: TextStyle(color: textColor, fontSize: 18)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLoadingIndicator() {
+    return Center(child: CircularProgressIndicator());
+  }
+
+  Widget _buildSettingsHeader(Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 12.0),
+      child: Text('Settings',
+          style: GoogleFonts.poppins(
+              fontSize: 22, fontWeight: FontWeight.w600, color: textColor)),
+    );
+  }
+
+  Widget _buildSettingsCard(List<Widget> children) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildSettingsTile({
+    required String title,
+    required IconData icon,
+    required Color color,
+    Function()? onTap,
+  }) {
+    return Material(
+      color: Colors.transparent, // Ensures ripple effect works
+      child: ListTile(
+        leading: Icon(icon, color: color, size: 26),
+        title: Text(title,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        trailing:
+            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade600),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  Widget _buildThemeSwitchTile(bool isDark) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Material(
+        color: Colors.transparent, // Ensures ripple effect works
+        child: SwitchListTile(
+          title: Text('App Theme'),
+          secondary:
+              Icon(isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded),
+          value: isDarkMode,
+          onChanged: (value) {
+            setState(() => isDarkMode = value);
+            value
+                ? AdaptiveTheme.of(context).setDark()
+                : AdaptiveTheme.of(context).setLight();
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLogoutCard() {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Material(
+        color: Colors.transparent, // Ensures ripple effect works
+        child: ListTile(
+          leading: Icon(Icons.logout_rounded, color: Colors.red, size: 26),
+          title: Text('Logout'),
+          onTap: () => MyDialogs.showMyAnimatedDialog(
+            context: context,
+            title: 'Logout',
+            content: 'Are you sure you want to logout?',
+            textAction: 'Logout',
+            onActionTap: (value, updatedText) async {
+              if (value) {
+                await context.read<AuthenticationProvider>().logout();
+                Navigator.pushNamedAndRemoveUntil(
+                    context, Constants.loginScreen, (route) => false);
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 }

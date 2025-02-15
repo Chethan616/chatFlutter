@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/enums/enums.dart';
@@ -256,6 +257,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                       }),
                 ),
               ),
+
               const Text(
                 'Select Group Members',
                 style: TextStyle(
@@ -272,7 +274,8 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               ),
 
               SizedBox(
-                height: MediaQuery.of(context).size.height * 0.3,
+                height: MediaQuery.of(context).size.height *
+                    0.3, // Adjest the height as needed
                 child: const FriendsList(
                   viewType: FriendViewType.groupView,
                 ),

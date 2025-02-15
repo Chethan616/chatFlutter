@@ -7,6 +7,8 @@ import 'package:flutter_chat_pro/providers/authentication_provider.dart';
 import 'package:flutter_chat_pro/providers/search_provider.dart';
 import 'package:flutter_chat_pro/streams/data_repository.dart';
 import 'package:flutter_chat_pro/widgets/friend_widget.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 class FriendsList extends StatelessWidget {
@@ -27,109 +29,226 @@ class FriendsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthenticationProvider, SearchProvider>(
-      builder: (context, authProvider, searchProvider, child) {
-        final uid = authProvider.userModel!.uid;
-        final searchQuery = searchProvider.searchQuery;
-        return FutureBuilder<Query>(
-          future: DataRepository.getFriendsQuery(
-            uid: uid,
-            viewType: viewType,
-            groupId: groupId,
-          ),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: isDarkMode
+              ? [
+                  Colors.deepPurple.shade900,
+                  Colors.indigo.shade900,
+                  Colors.blueGrey.shade900,
+                ]
+              : [
+                  Colors.deepPurple.shade100,
+                  Colors.indigo.shade100,
+                  Colors.blueGrey.shade100,
+                ],
+        ),
+      ),
+      child: Consumer2<AuthenticationProvider, SearchProvider>(
+        builder: (context, authProvider, searchProvider, child) {
+          final uid = authProvider.userModel!.uid;
+          final searchQuery = searchProvider.searchQuery;
 
-            if (!snapshot.hasData) {
-              return const Center(child: Text('No data available'));
-            }
+          return FutureBuilder<Query>(
+            future: DataRepository.getFriendsQuery(
+              uid: uid,
+              groupID: groupId,
+              viewType: viewType,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: Lottie.asset(
+                    'assets/lottie/loading.json',
+                    width: 150,
+                  ),
+                );
+              }
 
-            return FirestorePagination(
-              limit: limit,
-              isLive: isLive,
-              query: snapshot.data!,
-              itemBuilder: (context, documentSnapshot, index) {
-                final document = documentSnapshot[index];
-                final UserModel friend =
-                    UserModel.fromMap(document.data() as Map<String, dynamic>);
+              if (snapshot.hasError) {
+                return _buildErrorState('Something went wrong 😢');
+              }
 
-                // Apply search filter
-                if (!friend.name
-                    .toLowerCase()
-                    .contains(searchQuery.toLowerCase())) {
-                  if (index == documentSnapshot.length - 1 &&
-                      !documentSnapshot.any((doc) {
-                        final user = UserModel.fromMap(
-                            doc.data() as Map<String, dynamic>);
-                        return user.name
-                            .toLowerCase()
-                            .contains(searchQuery.toLowerCase());
-                      })) {
-                    return const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(20.0),
-                        child: Text(
-                          'No Matches Found',
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
+              if (!snapshot.hasData) {
+                return _buildEmptyState('No friends found');
+              }
+
+              return Scrollbar(
+                child: FirestorePagination(
+                  limit: limit,
+                  isLive: isLive,
+                  query: snapshot.data!,
+                  itemBuilder: (context, documentSnapshot, index) {
+                    final document = documentSnapshot[index];
+                    final friend = UserModel.fromMap(
+                        document.data() as Map<String, dynamic>);
+
+                    // 🔹 Filter based on viewType
+                    if (viewType == FriendViewType.friendRequests) {
+                      // Only show users who have sent friend requests
+                      if (!authProvider.userModel!.friendRequestsUIDs
+                          .contains(friend.uid)) {
+                        return const SizedBox
+                            .shrink(); // Skip if not in requests
+                      }
+                    }
+
+                    // Search filter
+                    if (!friend.name
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase())) {
+                      if (index == documentSnapshot.length - 1) {
+                        final hasMatches = documentSnapshot.any((doc) {
+                          final user = UserModel.fromMap(
+                              doc.data() as Map<String, dynamic>);
+                          return user.name
+                              .toLowerCase()
+                              .contains(searchQuery.toLowerCase());
+                        });
+
+                        if (!hasMatches) {
+                          return _buildEmptySearchState();
+                        }
+                      }
+                      return const SizedBox.shrink();
+                    }
+
+                    // Group membership check
+                    if (groupMembersUIDs.contains(friend.uid)) {
+                      if (index == documentSnapshot.length - 1 &&
+                          documentSnapshot.every(
+                              (doc) => groupMembersUIDs.contains(doc.id))) {
+                        return _buildInfoMessage(
+                            'All friends are already in the group');
+                      }
+                      return const SizedBox.shrink();
+                    }
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: FriendWidget(
+                          friend: friend,
+                          viewType: viewType,
+                          groupId: groupId,
                         ),
                       ),
                     );
-                  }
-                  return const SizedBox.shrink();
-                }
-
-                // Check if all friends are in group
-                if (index == documentSnapshot.length - 1 &&
-                    documentSnapshot.every((doc) {
-                      final user =
-                          UserModel.fromMap(doc.data() as Map<String, dynamic>);
-                      return groupMembersUIDs.contains(user.uid);
-                    })) {
-                  return const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text(
-                        'All your friends are already in this group',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
+                  },
+                  initialLoader: Center(
+                    child: Lottie.asset(
+                      'assets/lottie/loading.json',
+                      width: 150,
                     ),
-                  );
-                }
-
-                // Skip if friend is already in group
-                if (groupMembersUIDs.isNotEmpty &&
-                    groupMembersUIDs.contains(friend.uid)) {
-                  return const SizedBox.shrink();
-                }
-
-                return FriendWidget(
-                  friend: friend,
-                  viewType: viewType,
-                  groupId: groupId,
-                );
-              },
-              initialLoader: const Center(
-                child: CircularProgressIndicator(),
-              ),
-              onEmpty: const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: Text('No Friends Yet'),
+                  ),
+                  onEmpty: _buildEmptyState('No friends found'),
+                  bottomLoader: const Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation(Colors.deepPurple),
+                    ),
+                  ),
                 ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            'assets/lottie/error.json',
+            width: 200,
+          ),
+          Text(
+            message,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: Colors.red.shade700,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Lottie.asset(
+            'assets/lottie/empty.json',
+            width: 250,
+          ),
+          Text(
+            message,
+            style: GoogleFonts.poppins(
+              fontSize: 18,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptySearchState() {
+    return Center(
+      child: Column(
+        children: [
+          Lottie.asset(
+            'assets/lottie/search.json',
+            width: 200,
+          ),
+          Text(
+            'No matches found',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoMessage(String message) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.info_outline, color: Colors.blue),
+            const SizedBox(width: 10),
+            Text(
+              message,
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                color: Colors.blue.shade700,
               ),
-              bottomLoader: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          },
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

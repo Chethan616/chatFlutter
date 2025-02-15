@@ -196,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen>
     final authProvider = context.watch<AuthenticationProvider>();
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Flutter Chat Pro'),
+          title: const Text('FlareChat!?!?'),
           actions: [
             Padding(
               padding: const EdgeInsets.all(8.0),

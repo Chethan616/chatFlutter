@@ -21,7 +21,7 @@ class DisplayUserImage extends StatelessWidget {
         CircleAvatar(
           radius: radius,
           backgroundImage: finalFileImage == null
-              ? const AssetImage(AssetsMenager.userImage)
+              ? const AssetImage(AssetsManager.userImage)
               : FileImage(File(finalFileImage!.path)) as ImageProvider,
         ),
         Positioned(

@@ -7,7 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_pro/authentication/landing_screen.dart';
 import 'package:flutter_chat_pro/authentication/login_screen.dart';
-import 'package:flutter_chat_pro/authentication/opt_screen.dart';
+import 'package:flutter_chat_pro/authentication/otp_screen.dart';
 import 'package:flutter_chat_pro/authentication/user_information_screen.dart';
 import 'package:flutter_chat_pro/constants.dart';
 import 'package:flutter_chat_pro/firebase_options.dart';
@@ -36,6 +36,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -78,7 +79,7 @@ class MyApp extends StatelessWidget {
       builder: (theme, darkTheme) => MaterialApp(
         debugShowCheckedModeBanner: false,
         navigatorKey: navigatorKey,
-        title: 'Flutter Chat Pro',
+        title: 'FlareChat!?!?',
         theme: theme,
         darkTheme: darkTheme,
         initialRoute: Constants.landingScreen,

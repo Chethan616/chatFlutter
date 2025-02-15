@@ -16,18 +16,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _phoneNumberController = TextEditingController();
 
-  Country selectedCountry = Country(
-    phoneCode: '91',
-    countryCode: 'IN',
-    e164Sc: 0,
-    geographic: true,
-    level: 1,
-    name: 'India',
-    example: 'India',
-    displayName: 'India',
-    displayNameNoCountryCode: 'IN',
-    e164Key: '',
-  );
+  // Initialize selectedCountry as null
+  Country? selectedCountry;
 
   @override
   void dispose() {
@@ -36,123 +26,176 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthenticationProvider>();
     return Scaffold(
-        body: Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20.0,
-          vertical: 20.0,
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 50),
-            SizedBox(
-              height: 200,
-              width: 200,
-              child: Lottie.asset(AssetsMenager.chatBubble),
-            ),
-            Text(
-              'Flutter Chat Pro',
-              style: GoogleFonts.openSans(
-                fontSize: 28,
-                fontWeight: FontWeight.w500,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background Image
+          Image.asset(
+            'assets/images/chat.png',
+            fit: BoxFit.cover,
+          ),
+
+          // Dark overlay for better contrast
+          Container(
+            color: Colors.black.withOpacity(0.4),
+          ),
+
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20.0,
+                vertical: 20.0,
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Add your phone number will send you a code to verify',
-              textAlign: TextAlign.center,
-              style: GoogleFonts.openSans(
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 20),
-            TextFormField(
-              controller: _phoneNumberController,
-              maxLength: 10,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.done,
-              onChanged: (value) {
-                setState(() {
-                  _phoneNumberController.text = value;
-                });
-              },
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: 'Phone Number',
-                hintStyle: GoogleFonts.openSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-                prefixIcon: Container(
-                  padding: const EdgeInsets.fromLTRB(
-                    8.0,
-                    12.0,
-                    8.0,
-                    12.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Lottie Animation
+                  SizedBox(
+                    height: 200,
+                    width: 200,
+                    child: Lottie.asset(AssetsManager.chatBubble),
                   ),
-                  child: InkWell(
-                    onTap: () {
-                      showCountryPicker(
-                        context: context,
-                        showPhoneCode: true,
-                        onSelect: (Country country) {
-                          setState(() {
-                            selectedCountry = country;
-                          });
-                        },
-                      );
-                    },
-                    child: Text(
-                      '${selectedCountry.flagEmoji} +${selectedCountry.phoneCode}',
+
+                  const SizedBox(height: 20),
+
+                  // Title
+                  Text(
+                    'FlareChat!?!?',
+                    style: GoogleFonts.openSans(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Phone Number Input
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: TextFormField(
+                      controller: _phoneNumberController,
+                      maxLength: 10,
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.done,
                       style: GoogleFonts.openSans(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
-                    ),
-                  ),
-                ),
-                suffixIcon: _phoneNumberController.text.length > 9
-                    ? authProvider.isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(),
-                          )
-                        : InkWell(
+                      onChanged: (value) {
+                        // Call setState to rebuild the widget when the text changes
+                        setState(() {});
+                      },
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.transparent,
+                        counterText: '',
+                        hintText: 'Enter phone number',
+                        hintStyle: GoogleFonts.openSans(
+                          color: Colors.grey.shade600,
+                          fontSize: 16,
+                        ),
+                        prefixIcon: Container(
+                          padding: const EdgeInsets.only(left: 15, right: 10),
+                          child: InkWell(
                             onTap: () {
-                              // sign in with phone number
-                              authProvider.signInWithPhoneNumber(
-                                phoneNumber:
-                                    '+${selectedCountry.phoneCode}${_phoneNumberController.text}',
+                              showCountryPicker(
                                 context: context,
+                                showPhoneCode: true,
+                                countryListTheme: CountryListThemeData(
+                                  backgroundColor: Colors.white,
+                                  textStyle: GoogleFonts.openSans(fontSize: 16),
+                                ),
+                                onSelect: (Country country) {
+                                  setState(() {
+                                    selectedCountry = country;
+                                  });
+                                },
                               );
                             },
-                            child: Container(
-                              height: 35,
-                              width: 35,
-                              margin: const EdgeInsets.all(10),
-                              decoration: const BoxDecoration(
-                                color: Colors.green,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.done,
-                                color: Colors.white,
-                                size: 25,
+                            child: Text(
+                              selectedCountry != null
+                                  ? '${selectedCountry!.flagEmoji} +${selectedCountry!.phoneCode}'
+                                  : 'Select Country',
+                              style: GoogleFonts.openSans(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade800,
                               ),
                             ),
-                          )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+                          ),
+                        ),
+                        suffixIcon: _phoneNumberController.text.length > 9 &&
+                                selectedCountry != null
+                            ? authProvider.isLoading
+                                ? const Padding(
+                                    padding: EdgeInsets.all(12.0),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Colors.green,
+                                    ),
+                                  )
+                                : IconButton(
+                                    icon: Container(
+                                      decoration: const BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: const EdgeInsets.all(6),
+                                      child: const Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      authProvider.signInWithPhoneNumber(
+                                        phoneNumber:
+                                            '+${selectedCountry!.phoneCode}${_phoneNumberController.text}',
+                                        context: context,
+                                      );
+                                    },
+                                  )
+                            : null,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Instruction Text
+                  Text(
+                    'We will send you a verification code to confirm your number',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.openSans(
+                      fontSize: 14,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ));
+    );
   }
 }
