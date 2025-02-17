@@ -1,40 +1,65 @@
+# Flare Chat - A Fully Functional Chat Application
 
-A modern chat application built with Flutter and Firebase, providing a seamless real-time messaging experience.
+Flare Chat is a feature-rich, real-time chat application built using Flutter and Firebase. It supports both **1:1 messaging and group chats**, friend requests, real-time authentication, and notifications. The app also includes **light mode and dark mode** for a personalized user experience.
 
-Features
+## Features
 
-Authentication: phone number and otp
+✅ **1:1 Direct Messaging** – Chat with friends in real time with a seamless experience.
 
-Real-Time Messaging: 1:1
+✅ **Group Chats** – Create and join group chats with multiple participants.
 
-Multimedia Support: Send/receive images, videos, and audio messages.
+✅ **Friend Requests** – Send, accept, and decline friend requests to build your chat network.
 
-Voice Recording: Record and share voice messages directly in the chat.
+✅ **Real-Time Authentication** – Secure authentication system powered by Firebase.
 
+✅ **Push Notifications** – Get real-time updates when you receive new messages or friend requests.
 
-How to Run
+✅ **Dark Mode & Light Mode** – Switch between themes for a comfortable chatting experience.
 
-1. Clone this repository.
+✅ **Smooth Pagination** – Efficiently loads chat messages using Firebase pagination.
 
+## Screenshots
 
-2. Run flutter pub get to install dependencies.
+### Light Mode
+![Chat Screen](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131429810.png)
+![Group Chat](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131507631.png)
+![Friend Requests](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131515892.png)
+![User Profile](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131520711.png)
 
+### Dark Mode
+![Dark Mode Chat](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131525739.png)
+![Dark Mode Group Chat](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131530657.png)
+![Dark Mode Friend Requests](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131534435.png)
+![Dark Mode User Profile](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131539802.png)
 
-3. Set up Firebase for the app (Android/iOS&Web).
+### More Screens
+![Authentication](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131544545.png)
+![Settings](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131549305.png)
+![Notifications](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131553944.png)
+![User Search](https://github.com/Chethan616/flare-chat/blob/main/image_2025-02-17_131600129.png)
 
+## Installation
 
-4. Run flutter run to launch the app.
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/Chethan616/chatFlutter.git
+   cd flare-chat
+   ```
+2. Install dependencies:
+   ```sh
+   flutter pub get
+   ```
+3. Run the app:
+   ```sh
+   flutter run
+   ```
 
+## Technologies Used
+- **Flutter** – For cross-platform development
+- **Firebase Firestore** – For real-time data storage
+- **Firebase Authentication** – For user authentication
+- **Firebase Cloud Messaging (FCM)** – For push notifications
 
-
-Tech Stack
-
-Flutter for frontend.
-
-Firebase for backend (Firestore, Storage, Authentication).
-
-
-Contribution
-
-Contributions are welcome! Feel free to submit issues or pull requests.
+## Contributing
+Contributions are welcome! Feel free to fork the repository, submit issues, or create pull requests to improve the project.
 
