@@ -138,13 +138,13 @@ class FriendsButton extends StatelessWidget {
               onPressed: () async {
                 await context
                     .read<AuthenticationProvider>()
-                    .cancleFriendRequest(friendID: userModel.uid)
+                    .cancelFriendRequest(friendID: userModel.uid)
                     .whenComplete(() {
                   GlobalMethods.showSnackBar(
                       context, 'friend request canclled');
                 });
               },
-              label: 'Cancle Request',
+              label: 'Cancel Request',
               width: MediaQuery.of(context).size.width * 0.7,
               backgroundColor: Theme.of(context).cardColor,
               textColor: Theme.of(context).colorScheme.primary,

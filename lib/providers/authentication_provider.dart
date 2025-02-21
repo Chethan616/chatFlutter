@@ -414,7 +414,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> cancleFriendRequest({required String friendID}) async {
+  Future<void> cancelFriendRequest({required String friendID}) async {
     try {
       // remove our uid from friends request list
       await _firestore.collection(Constants.users).doc(friendID).update({
