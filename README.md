@@ -60,3 +60,5 @@ Flare Chat is a feature-rich, real-time chat application built using Flutter and
 ## Contributing
 Contributions are welcome! Feel free to fork the repository, submit issues, or create pull requests to improve the project.
 
+
+😀...
