@@ -58,7 +58,7 @@ dependencies:
   permission_handler: ^11.1.0
   audioplayers: ^6.0.0
   path_provider: ^2.1.2
-  cached_video_player: ^2.0.4
+  #cached_video_player: ^2.0.4
   emoji_picker_flutter: ^2.2.0
   animate_do: ^3.1.2
   flutter_chat_reactions: ^0.1.0
@@ -67,6 +67,9 @@ dependencies:
   open_settings: ^2.0.2
   flutter_app_badger: ^1.5.0
   firebase_pagination: ^4.0.1
+  video_player: ^2.8.0
+  chewie: ^1.4.0  # For better controls
+  flutter_cache_manager: ^3.3.1  # For caching videos
 
 
 dev_dependencies:
