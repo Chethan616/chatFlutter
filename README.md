@@ -52,7 +52,7 @@ Flare Chat is a feature-rich, real-time chat application built using Flutter and
    ```
 
 ## Technologies Used
-- **Flutter** – For cross-platform development
+- **Flutter** – For cross-platform development sdk 3.32.5
 - **Firebase Firestore** – For real-time data storage
 - **Firebase Authentication** – For user authentication
 - **Firebase Cloud Messaging (FCM)** – For push notifications
